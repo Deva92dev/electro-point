@@ -1,36 +1,131 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+### Libraries for my website
 
-## Getting Started
+    FeatureLibrary3D Product Rotation  => @react-three/fiber + @react-three/drei
+    AR "View in Space"  => threejs/react-three-fibre
+    Trending Carousel => embla-carousel-reactCustomer
+    Gallery Grid =>  react-masonry-css
+    Lightbox (Gallery) => yet-another-react-lightbox(pure css)
+    Video Player  => HTML5 video player
+    Load Images =>  Native NextJs
+    Scroll Animations => react-intersection-observer + framer-motion
+    Newsletter Form => react-hook-form + zod
+    Icons => lucide-react
+    Toast Notifications => sonner
+    Smooth Scroll => lenis
 
-First, run the development server:
+### why unified motion system
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+1. You must keep it purely compositional — no internal business logic, no state
+   mutation, no animations inside it.
+   Just reactive signals → combined interface.
+   Think of it as a motion data bus, not a logic brain.
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+   That gives you the ability to build virtually any interactive component that depends on motion input, without ever attaching new raw event listeners inside the component itself. (all those 3 providers and 2 zones)
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+2. The perspective value (e.g., 1000, 500, 2000) is the distance in pixels from
+   the viewer to the object:
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+   Lower values (100-500): More dramatic, exaggerated 3D effect (closer to viewer)
+   Higher values (1000-2000): Subtle, realistic 3D effect (farther from viewer)
+   Very high (3000+): Almost flat, minimal 3D effect.
+   Perspective must be on the parent element, not the element being transformed.
+   You can also control where the viewer is looking from using perspectiveOrigin.
 
-## Learn More
+3. Wrap with these (other than 3 global providers) where they actually needed example
+   in cards where text is only use there
 
-To learn more about Next.js, take a look at the following resources:
+4. scrollYProgress from Lenis is very useful for:
+   Global Progress Bar (Common Use Case)
+   Navbar that Changes Based on Total Page Scroll
+   Multi-Section Page Color Change
+   Footer That Fades In at Bottom
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+5. For using (useScrollSegment) the scroll progress range you care about,
+   not the full scroll of the page.
+   If you only want a motion to happen while the container is visible, this ensures the value only changes within that segment.
+   Outside that range, the value is clamped, so your element doesn’t overshoot or behave unexpectedly.
+   Lets multiple scroll-driven animations coexist independently on the same page.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+### Color Design system
 
-## Deploy on Vercel
+    Core Color Application Strategy
+    Here is a breakdown of which elements should use which color variables.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Primary Colors (The "Action" Colors)
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+--primary (Amethyst: #7C3AED / #A78BFA)
+Use: This is your main "action" color. Use it for the most important interactive elements that you want users to click.
+Elements:
+Buttons: "Add to Cart," "Buy Now," "Sign Up," "Checkout."
+Links: Active navigation links (e.g., the page you are currently on).
+Headlines: Main section titles (e.g., "Featured Laptops") for extra visual punch.
+Key Icons: Cart icon, user profile icon.
+
+--primary-foreground (White / Dark Slate)
+Use: The text/icon color that sits on top of --primary.
+Elements: Text inside your main buttons.
+
+--secondary (Light Purple: #F5F3FF / #2D2D3A)
+Use: For secondary actions or highlighting related information without competing with the primary color.
+Elements:
+Buttons: "View Details," "Compare," "Add to Wishlist."
+Filters: Active filter tags (e.g., "Brand: Apple
+Backgrounds: Subtle info boxes or "Quick Look" pop-ups.
+
+--secondary-foreground (Amethyst / Light Gray)
+Use: The text color that sits on top of --secondary.
+Elements: Text inside secondary buttons.
+
+## Accent & Utility Colors
+
+--accent (Light Cyan: #ECFEFF / #2D2D3A)
+Use: This is your "callout" color. It's great for drawing attention to special information that isn't a primary action.
+Elements:
+Badges: "New," "On Sale," "Featured."
+Banners: "Free Shipping on orders over $50."
+Alerts: Informational messages (not errors).
+
+--destructive (Red: #EF4444 / #F87171)
+Use: Only for negative or "danger" actions.
+Elements:
+"Remove from Cart" button/icon.
+Error messages (e.g., "Payment failed").
+"Out of Stock" labels.
+
+Neutral Colors (The "Structure")
+--background & --foreground
+Use: The main page background and default text color. These create your site's main canvas.
+
+--card & --card-foreground
+Use: The background for all "contained" elements. This is critical for making your UI look clean and organized.
+Elements:
+Product cards.
+Navbar and Footer (in dark mode).
+Modal dialogs and popovers.
+Sidebar.
+
+--muted & --muted-foreground
+Use: For less important text that provides context but shouldn't be distracting.
+Elements:
+Product specs (e.g., "Screen Size," "Storage").
+Breadcrumbs.
+Helper text under form fields (e.g., "Password must be 8 characters").
+Disabled buttons or states.
+
+--border & --input
+Use: For structural separation and form fields.
+Elements:
+The border around product cards (subtle).
+Input fields (Search bar, forms).
+Dividers (e.g., <hr> tags).
+
+### Cache Life
+
+| Profile | Use Case               | Revalidate | Best For Your App             |
+| ------- | ---------------------- | ---------- | ----------------------------- |
+| seconds | Real-time data         | 1 second   | Live inventory, flash sales   |
+| minutes | Frequently updated     | 1 minute   | ✅ Products, pricing          |
+| hours   | Multiple daily updates | 1 hour     | ✅ Categories, featured items |
+| days    | Daily updates          | 1 day      | Blog posts, static pages      |
+| weeks   | Weekly updates         | 1 week     | Newsletters, podcasts         |
+| max     | Rarely changes         | 30 days    | Terms, privacy policy         |
