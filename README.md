@@ -1,17 +1,8 @@
+#### Touch-First Interactions (active:scale, touch-manipulation) to make the web app feel native.
+
 ### Libraries for my website
 
-    FeatureLibrary3D Product Rotation  => @react-three/fiber + @react-three/drei
-    AR "View in Space"  => threejs/react-three-fibre
-    Trending Carousel => embla-carousel-reactCustomer
-    Gallery Grid =>  react-masonry-css
-    Lightbox (Gallery) => yet-another-react-lightbox(pure css)
-    Video Player  => HTML5 video player
-    Load Images =>  Native NextJs
-    Scroll Animations => react-intersection-observer + framer-motion
     Newsletter Form => react-hook-form + zod
-    Icons => lucide-react
-    Toast Notifications => sonner
-    Smooth Scroll => lenis
 
 ### why unified motion system
 
@@ -129,3 +120,48 @@ Dividers (e.g., <hr> tags).
 | days    | Daily updates          | 1 day      | Blog posts, static pages      |
 | weeks   | Weekly updates         | 1 week     | Newsletters, podcasts         |
 | max     | Rarely changes         | 30 days    | Terms, privacy policy         |
+
+### Database performance
+
+- Use db.query (Relational API) for fetching data to display on your frontend (e.g., Product Details Page, User Profile). It's cleaner, type-safe, and easier to read.
+
+- Use db.select() for complex aggregations, analytics, or when performance is absolutely critical and you only need 2 columns out of 50.
+
+### System Performance
+
+- Import (src/assets): Optimization works + Automatic Size + Automatic Blur + Cache Busting. Superior. for static images
+
+- performance.now();
+- end = performance.now();
+
+  console.log(
+  `⚡ [Database] getProductsByColor took ${(end - start).toFixed(2)}ms`
+  );
+  console.log(`   📦 Items fetched: ${allProducts.length}`);
+
+- If you are using glassmorphism, it is must to have something in background, a parent element, blob, image etc
+
+- If you make a div with a gradient, it’s still a square (or circle) with hard edges. It looks like a sticker. To make it look like light (atmosphere), you need a Blur Filter.
+
+- In a Server Component page, you can access search parameters using the "searchParams" prop:
+
+- ALWAYS use the "columns": filter.
+  If you use db.query without filtering columns, it is slow. If you use it with filtering, it is effectively as fast as db.select but with much better Developer Experience (DX).
+
+  ### PostgreSQL Operators (The Logic)
+
+  - The "sql "tag is a template literal. It does not "know" SQL. It just safely packages variables to send to the database.
+
+  - The symbol @> is not TypeScript. It is PostgreSQL. To expand your filtering, you must learn Postgres Operators.
+
+  - @> (Contains): Used for JSONB. "Does the array on the left contain the array on the right?"
+
+  - ? (Exists): "Does this key string exist in the JSONB object?"
+
+  - ilike (Case-insensitive Like): Used for search text. name ilike '%macbook%'.
+
+  - > = / <=: Standard math for prices.
+
+  - SQL Injection: Never write ${value} inside a raw string. Always use the ${value} interpolation provided by sql tag so Drizzle sanitizes it.
+
+## Random for now

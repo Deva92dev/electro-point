@@ -1,0 +1,18 @@
+/* Use this only for small, reusable utility classes, not full components. */
+
+@layer utilities {
+  .bg-brand-gradient {
+    background-image: var(--brand-gradient);
+  }
+
+  .text-gradient {
+    background-image: var(--brand-gradient);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+
+  .mask-box {
+    mask: radial-gradient(40px at 40px 40px, #0000 98%, #000) -40px -40px;
+  }
+}

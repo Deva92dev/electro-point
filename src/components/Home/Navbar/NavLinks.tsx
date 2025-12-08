@@ -8,27 +8,33 @@ export const navLinks = [
   { label: "About", href: "/about" },
 ];
 
-// beautification later write each features what you implement or (better than other) in readme this way you will create content easily
-const NavLinks = () => {
+const NavLinks = ({
+  className = "",
+  onClick,
+}: {
+  className?: string;
+  onClick?: () => void;
+}) => {
   const pathname = usePathname();
 
   return (
-    <ul className="flex flex-row gap-4">
+    <ul className={`flex gap-1 ${className}`}>
       {navLinks.map((link) => {
         const isActive = pathname === link.href;
 
         return (
           <Link
             href={`${link.href}`}
+            onClick={onClick}
             key={link.href}
             className={`
-                    relative block transition-colors duration-200
+                relative px-4 py-2 rounded-full text-sm font-medium transition-all duration-200
                 ${
                   isActive
-                    ? "text-primary font-semibold"
-                    : "text-muted-foreground hover:text-foreground"
+                    ? "text-primary bg-primary/10"
+                    : "text-muted-foreground hover:text-foreground hover:bg-muted"
                 }
-                `}
+              `}
           >
             {link.label}
           </Link>

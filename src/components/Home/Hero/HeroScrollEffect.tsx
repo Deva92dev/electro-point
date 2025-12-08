@@ -1,17 +1,10 @@
 "use client";
 
-import { getHeroCard } from "@/lib/imagekit-loader";
-import Image from "next/image";
-import {
-  m,
-  useMotionValue,
-  useScroll,
-  useSpring,
-  useTransform,
-} from "@/components/motion";
+import { m, useScroll, useTransform } from "@/components/motion";
 import { useRef } from "react";
+import HeroCard from "./HeroCard";
 
-interface CategoryHeroItemType {
+export interface CategoryHeroItemType {
   id: number;
   name: string;
   productType:
@@ -29,37 +22,32 @@ interface Props {
 }
 
 const HeroScrollEffect = ({ results }: Props) => {
-  const ref = useRef(null);
-
-  const { scrollY, scrollYProgress } = useScroll({
-    container: ref,
+  const carouselRef = useRef(null);
+  const { scrollYProgress } = useScroll({
+    target: carouselRef,
+    axis: "y",
+    offset: ["start end", "end start"],
   });
-
-  // const {} = useTransform()
+  const input = [0, 1];
+  const output = ["0%", "-40%"];
+  const x = useTransform(scrollYProgress, input, output);
 
   return (
-    <m.section ref={ref} className="p-4 flex flex-row gap-4" style={{}}>
-      {results.map((item, index) => {
-        const imageUrl = item.imageUrl
-          ? getHeroCard(item.imageUrl)
-          : "/placeholder.jpg";
-
-        return (
-          <div key={item.id} className="">
-            <div className="relative w-96 h-hero-card-lg">
-              <Image
-                src={imageUrl}
-                alt={item.name}
-                fill
-                preload={index === 0}
-                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                className="object-cover  rounded-xl"
-              />
-            </div>
-          </div>
-        );
-      })}
-    </m.section>
+    <section
+      ref={carouselRef}
+      className="w-full py-12 lg:py-24 overflow-x-hidden bg-background"
+    >
+      <div className="container mx-auto px-4 mb-12">
+        <h2 className="text-xl md:text-2xl font-medium tracking-tight text-muted-foreground">
+          Explore Collections
+        </h2>
+      </div>
+      <m.div className="flex gap-6 pl-4 md:pl-12 w-max" style={{ x }}>
+        {results.map((item, index) => (
+          <HeroCard key={item.id} item={item} index={index} />
+        ))}
+      </m.div>
+    </section>
   );
 };
 

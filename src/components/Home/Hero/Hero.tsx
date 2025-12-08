@@ -1,26 +1,28 @@
-import { getCategoriesWithImages } from "@/lib/data";
+import { getCategoriesWithImages } from "@/components/j-curve-mastery/data";
 import HeroScrollEffect from "./HeroScrollEffect";
 
 const Hero = async () => {
-  const categoryResults = await getCategoriesWithImages();
-  // console.log(categoryResults);
+  const categoryResults = (await getCategoriesWithImages()).slice(0, 5);
 
-  if (categoryResults.length === 0) {
-    return (
-      <div className="flex h-[50vh] items-center justify-center bg-gradient-to-b from-muted to-background">
-        <div className="text-center px-4">
-          <h1 className="text-4xl md:text-6xl font-bold mb-4 text-foreground">
-            Welcome to Electro Point
+  return (
+    <section className="w-full pt-8 pb-12 md:pt-12 md:pb-24 overflow-hidden">
+      <div className="w-full pl-4 md:pl-8 lg:pl-12">
+        <div className="flex items-end justify-between pr-4 md:pr-12 mb-8">
+          <h1 className="text-4xl md:text-6xl lg:text-7xl font-black tracking-tighter uppercase leading-[0.9]">
+            Future <br />
+            <span className="text-transparent bg-clip-text bg-linear-to-r from-primary to-purple-600">
+              Ready.
+            </span>
           </h1>
-          <p className="text-xl text-muted-foreground">
-            Premium Electronics Collection
+          <p className="hidden md:block text-muted-foreground max-w-xs text-sm font-medium text-right">
+            Explore the 2025 collection. <br />
+            Curated for the modern creator.
           </p>
         </div>
+        <HeroScrollEffect results={categoryResults} />
       </div>
-    );
-  }
-
-  return <HeroScrollEffect results={categoryResults} />;
+    </section>
+  );
 };
 
 export default Hero;

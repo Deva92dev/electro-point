@@ -1,12 +1,24 @@
+import ComparisonServer from "@/components/Home/Comparison/ComparisonServer";
 import Hero from "@/components/Home/Hero/Hero";
-import ProductFinder from "@/components/Home/ProductFinder/ProductFinder";
+import HeroSkeleton from "@/components/Home/Hero/HeroSkeleton";
 
-// fix hero is taking too much space, when i scroll after 3-4 hero images(i mean when they start going out of viewport), i should start seeing ProductFinder component
+import ProductFinder from "@/components/Home/ProductFinder/ProductFinder";
+import Services from "@/components/Home/Services";
+import Marquee from "@/components/Home/Velocity/Marquee";
+import TrendingNow from "@/components/Home/Velocity/TrendingNow";
+import { Suspense } from "react";
+
 export default async function Home() {
   return (
     <>
-      <Hero />
+      <Suspense fallback={<HeroSkeleton />}>
+        <Hero />
+      </Suspense>
       <ProductFinder />
+      <Marquee />
+      <TrendingNow />
+      <ComparisonServer />
+      <Services />
     </>
   );
 }

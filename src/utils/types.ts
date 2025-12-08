@@ -1,5 +1,5 @@
 import { products } from "@/db/schema";
-import { getHeroImages, getProductsFinder } from "./actions";
+import { getAllProducts, getHeroImages, getProductsFinder } from "./actions";
 
 export type HeroImage = Awaited<ReturnType<typeof getHeroImages>>[number];
 export interface category {
@@ -57,3 +57,72 @@ export type FilteredProduct = {
 };
 
 export type FilteredProductsType = FilteredProduct[];
+
+export interface ComparisonProduct {
+  id: number;
+  name: string;
+  slug: string;
+  mainImagePath: string;
+  quickSpecs: Record<string, string | undefined> | null;
+}
+
+// this is how same color equals same image match in db
+
+export interface VariantsType {
+  color: string | null;
+  imagePath: string | null;
+}
+export interface ProductCardType {
+  basePrice: string;
+  name: string;
+  productType:
+    | "laptop"
+    | "smartphone"
+    | "headphones"
+    | "tablet"
+    | "smartwatch"
+    | "tv";
+  salePrice: string | null;
+  slug: string;
+  variants: {
+    color: string | null;
+    imagePath: string | null;
+  }[];
+  category: {
+    name: string;
+  };
+}
+
+export type GetAllProductsType = Awaited<ReturnType<typeof getAllProducts>>;
+
+export interface ProductsGridType {
+  mainImagePath: string;
+  variants: {
+    color: string | null;
+    image: string;
+  }[];
+  id: number;
+  name: string;
+  slug: string;
+  productType:
+    | "laptop"
+    | "smartphone"
+    | "headphones"
+    | "tablet"
+    | "smartwatch"
+    | "tv";
+  availableColors:
+    | {
+        name: string;
+        hex: string;
+      }[]
+    | null;
+  basePrice: string;
+  salePrice: string | null;
+  brand: {
+    name: string;
+  } | null;
+  category: {
+    name: string;
+  };
+}

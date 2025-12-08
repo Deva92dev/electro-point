@@ -5,15 +5,18 @@ import NavLinks from "./NavLinks";
 
 const Navbar = () => {
   return (
-    <nav className="w-full h-20 bg-[image:var(--gradient-hero)]">
-      <div className="flex flex-row md:hidden px-2 md:px-4 lg:px-8 items-center">
-        <Logo />
+    <nav className="sticky top-0 z-50 h-20 border-b border-border/40 bg-background/80 backdrop-blur-md supports-[backdrop-filter]:bg-background/60">
+      <div className="max-w-7xl mx-auto h-full px-4 flex items-center justify-between">
+        <div className="flex-shrink-0">
+          <Logo />
+        </div>
+        <div className="hidden md:block">
+          <NavLinks />
+        </div>
+        <div className="hidden md:block">
+          <ActionButtons />
+        </div>
         <Dropdown />
-      </div>
-      <div className="hidden md:flex md:flex-row md:justify-between md:gap-4 items-center p-4">
-        <Logo />
-        <NavLinks />
-        <ActionButtons />
       </div>
     </nav>
   );

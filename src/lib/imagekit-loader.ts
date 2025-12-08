@@ -211,7 +211,7 @@ export const getProductCard = (src: string): string => {
     transformations: {
       width: 400,
       height: 400,
-      crop: "maintain_ratio",
+      crop: "at_max",
       format: "auto",
       progressive: true,
     },

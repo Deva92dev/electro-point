@@ -1,7 +1,7 @@
 const HeroScrollSkeleton = () => {
   return (
     <div className="relative h-[300vh]">
-      <div className="sticky top-0 h-screen overflow-hidden bg-gradient-to-b from-background via-card to-background">
+      <div className="sticky top-0 h-screen overflow-hidden bg-linear-to-b from-background via-card to-background">
         <div className="absolute inset-0 opacity-30">
           <div className="absolute top-[20%] -left-[10%] w-[600px] h-[600px] bg-primary/20 rounded-full blur-3xl" />
           <div className="absolute bottom-[20%] -right-[10%] w-[800px] h-[800px] bg-chart-2/20 rounded-full blur-3xl" />
@@ -16,9 +16,9 @@ const HeroScrollSkeleton = () => {
             {[...Array(6)].map((_, index) => (
               <div
                 key={index}
-                className="relative flex-shrink-0 w-[280px] md:w-[380px] h-[380px] md:h-[500px] rounded-4xl overflow-hidden bg-muted border border-border"
+                className="relative shrink-0 w-hero-card-md md:w-[380px] h-[380px] md:h-[500px] rounded-4xl overflow-hidden bg-muted border border-border"
               >
-                <div className="absolute inset-0 -translate-x-full animate-[shimmer_2s_infinite] bg-gradient-to-r from-transparent via-white/10 to-transparent" />
+                <div className="absolute inset-0 -translate-x-full animate-[shimmer_2s_infinite] bg-linear-to-r from-transparent via-white/10 to-transparent" />
                 <div className="absolute bottom-6 left-6 right-6 space-y-3">
                   <div className="h-6 w-24 bg-background/80 rounded-full animate-pulse" />
                   <div className="h-6 w-full bg-background/70 rounded animate-pulse" />

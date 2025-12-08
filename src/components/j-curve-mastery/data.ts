@@ -21,13 +21,3 @@ export const getCategoriesWithImages = async () => {
 
   return categoryResult;
 };
-
-// export const getAllSpecs = async () => {
-//   const allSpecs = await db
-//     .select({
-//       specs: products.quickSpecs,
-//     })
-//     .from(products);
-
-//   return allSpecs;
-// };

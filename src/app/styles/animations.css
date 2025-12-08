@@ -1,0 +1,45 @@
+/* Place all custom keyframes + animation shortcuts here. */
+
+@layer utilities {
+  .animate-skew-wiggle {
+    animation: skew-wiggle 20s infinite;
+  }
+
+  .animate-scroll-left {
+    animation: scroll-left 40s linear infinite;
+  }
+
+  .animate-scroll-right {
+    animation: scroll-right 40s linear infinite;
+  }
+}
+
+@keyframes scroll-left {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+@keyframes scroll-right {
+  from {
+    transform: translateX(-50%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+@keyframes skew-wiggle {
+  0% {
+    transform: skew(0deg);
+  }
+  50% {
+    transform: skew(25deg);
+  }
+  100% {
+    transform: skew(0deg);
+  }
+}

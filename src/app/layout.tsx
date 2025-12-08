@@ -6,6 +6,7 @@ import { LenisProvider } from "@/components/providers/LenisProvider";
 import { DirectionProvider } from "@/components/providers/DirectionProvider";
 import Navbar from "@/components/Home/Navbar/Navbar";
 import Footer from "@/components/Home/Footer/Footer";
+import { ThemeProvider } from "@/components/global/ThemeProvider";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -28,16 +29,22 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" className="light" style={{ colorScheme: "light" }}>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased glass`}
       >
         <MotionProvider>
           <LenisProvider>
             <DirectionProvider>
-              <Navbar />
-              {children}
-              <Footer />
+              <ThemeProvider
+                attribute="class"
+                defaultTheme="system"
+                enableSystem
+              >
+                <Navbar />
+                {children}
+                <Footer />
+              </ThemeProvider>
             </DirectionProvider>
           </LenisProvider>
         </MotionProvider>

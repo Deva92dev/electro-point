@@ -1,0 +1,140 @@
+/* Tokens must be static, global, and never contain component-specific logic. */
+
+@theme inline {
+  /* FONT & RADIUS PRESETS */
+  --font-sans: var(--font-sans);
+  --font-mono: var(--font-geist-mono);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+
+  /* 8-POINT GRID CARD DIMENSIONS
+     Locked into the theme. No more magic numbers.
+     Usage: w-hero-card-md, h-hero-card-lg, etc.
+  */
+  --width-hero-card-base: 200px; /* 25 * 8 */
+  --height-hero-card-base: 280px; /* 35 * 8 */
+
+  --width-hero-card-xs: 224px; /* 28 * 8 */
+  --height-hero-card-xs: 304px; /* 38 * 8 */
+
+  --width-hero-card-sm: 240px; /* 30 * 8 */
+  --height-hero-card-sm: 328px; /* 41 * 8 */
+
+  --width-hero-card-md: 280px; /* 35 * 8 */
+  --height-hero-card-md: 384px; /* 48 * 8 */
+
+  --width-hero-card-lg: 336px; /* 42 * 8 */
+  --height-hero-card-lg: 520px; /* 65 * 8 */
+
+  --width-hero-card-xl: 384px; /* 48 * 8 */
+  --height-hero-card-xl: 576px; /* 72 * 8 */
+
+  --width-hero-card-2xl: 416px; /* 52 * 8 */
+  --height-hero-card-2xl: 640px; /* 80 * 8 */
+
+  /* SEMANTIC COLORS (The "Achromatic + 1" System) */
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+
+  /* Sidebar (If you must keep it separate) */
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+}
+
+:root {
+  --radius: 0.625rem;
+
+  /* TYPOGRAPHY SYSTEM (16px base, 1.250 ratio, 8px rhythm) */
+  --font-sans: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    "Helvetica Neue", Arial, sans-serif;
+  --base-grid: 8px;
+  --fs-sm: 0.8rem;
+  --fs-base: 1rem;
+  --fs-md: 1.25rem;
+  --fs-lg: 1.5625rem;
+  --fs-xl: 1.9531rem;
+  --fs-2xl: 2.4414rem;
+  --fs-3xl: 3.0518rem;
+  --fs-4xl: 3.8147rem;
+
+  --lh-tight: calc(3 * var(--base-grid));
+  --lh-base: calc(4 * var(--base-grid));
+  --lh-heading: calc(5 * var(--base-grid));
+  --lh-hero: calc(8 * var(--base-grid));
+
+  /* ACHROMATIC BASE */
+  --background: #ffffff;
+  --foreground: #111111;
+  --card: #ffffff;
+  --card-foreground: #111111;
+  --popover: #ffffff;
+  --popover-foreground: #111111;
+  --muted: #f3f4f6;
+  --muted-foreground: #64748b;
+  --border: #e2e8f0;
+  --input: #e2e8f0;
+
+  /* BRAND ACCELERATOR (Indigo-700, WCAG AA Accessible) */
+  --primary: #4338ca;
+  --primary-foreground: #ffffff;
+  --secondary: #eef2ff;
+  --secondary-foreground: #4338ca;
+  --accent: #f3f4f6;
+  --accent-foreground: #111111;
+  --destructive: #ef4444;
+  --destructive-foreground: #ffffff;
+  --ring: #4338ca;
+
+  /* BRAND GRADIENT (Anchored to Primary) */
+  --brand-gradient: linear-gradient(135deg, #4338ca 0%, #06b6d4 100%);
+}
+
+.dark {
+  --background: #0f172a;
+  --foreground: #f8fafc;
+  --card: #1e293b;
+  --card-foreground: #f8fafc;
+  --popover: #1e293b;
+  --popover-foreground: #f8fafc;
+  --muted: #334155;
+  --muted-foreground: #94a3b8;
+  --border: #334155;
+  --input: #334155;
+
+  /* BRAND ACCELERATOR DARK (Indigo-400, WCAG AA Accessible) */
+  --primary: #818cf8;
+  --primary-foreground: #0f172a;
+  --secondary: #1e293b;
+  --secondary-foreground: #818cf8;
+  --accent: #334155;
+  --accent-foreground: #f8fafc;
+  --destructive: #f87171;
+  --destructive-foreground: #0f172a;
+  --ring: #818cf8;
+  --brand-gradient: linear-gradient(135deg, #818cf8 0%, #22d3ee 100%);
+}

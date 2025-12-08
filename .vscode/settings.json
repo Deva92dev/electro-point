@@ -3,6 +3,7 @@
   "prisma-smart-formatter.typescriptreact.defaultFormatter": "esbenp.prettier-vscode",
   "cSpell.words": [
     "asus",
+    "Chipset",
     "esim",
     "fitbit",
     "imagekit",
