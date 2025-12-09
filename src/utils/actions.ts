@@ -361,12 +361,12 @@ export const getAllProduct = async (colors: string) => {
     },
   });
 
-  const end = performance.now();
+  // const end = performance.now();
 
-  console.log(
-    `⚡ [Database] getProductsByColor took ${(end - start).toFixed(2)}ms`
-  );
-  console.log(`   📦 Items fetched: ${allProducts.length}`);
+  // console.log(
+  //   `⚡ [Database] getProductsByColor took ${(end - start).toFixed(2)}ms`
+  // );
+  // console.log(`   📦 Items fetched: ${allProducts.length}`);
 
   return allProducts;
 };
@@ -377,7 +377,6 @@ export const getAllProducts = async (params: {
   maxPrice?: string;
   minPrice?: string;
   color?: string;
-  productType?: string;
   search?: string;
   brand?: string;
   category?: string;
@@ -397,18 +396,16 @@ export const getAllProducts = async (params: {
   if (params.search) {
     conditions.push(ilike(products.name, `%${params.search}%`));
   }
-  if (params.productType) {
-    conditions.push(eq(products.productType, params.productType as any));
-  }
   if (params.minPrice) {
     conditions.push(gte(products.basePrice, `${params.minPrice}`));
   }
   if (params.maxPrice) {
     conditions.push(lte(products.basePrice, `${params.maxPrice}`));
   }
+  // By casting the JSONB column to text (::text) and using ILIKE (Case-insensitive Like), we turn the complex object array [{"name": "Space Black", "hex": "#000"}] into a searchable string.
   if (params.color) {
     conditions.push(
-      sql`${products.availableColors} @> ${JSON.stringify([params.color])}`
+      sql`${products.availableColors}::text ILIKE ${`%${params.color}%`} `
     );
   }
   if (params.brand) {
@@ -464,7 +461,6 @@ export const getAllProducts = async (params: {
         slug: true,
         name: true,
         basePrice: true,
-        productType: true,
         salePrice: true,
         mainImagePath: true,
         availableColors: true,

@@ -7,14 +7,8 @@ import HeroCard from "./HeroCard";
 export interface CategoryHeroItemType {
   id: number;
   name: string;
-  productType:
-    | "laptop"
-    | "smartphone"
-    | "tablet"
-    | "smartwatch"
-    | "headphones"
-    | "tv";
-  imageUrl: string | null;
+  productType: string;
+  imageUrl: string;
 }
 
 interface Props {

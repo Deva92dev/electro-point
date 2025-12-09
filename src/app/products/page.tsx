@@ -1,27 +1,3 @@
-// import SidebarFilter from "@/components/j-curve-mastery/SidebarFilter";
-// import { getAllProduct, getUniqueColors } from "@/utils/actions";
-
-// interface Props {
-//   searchParams: Promise<{
-//     colors?: string;
-//   }>;
-// }
-
-// const ProductsPage = async ({ searchParams }: Props) => {
-//   const { colors } = await searchParams;
-//   const products = await getAllProduct(colors || "");
-//   const allColors = await getUniqueColors();
-
-//   // console.log(products);
-//   return (
-//     <div>
-//       <SidebarFilter allColors={allColors} />
-//     </div>
-//   );
-// };
-
-// export default ProductsPage;
-
 import FilterSidebar from "@/components/product/filter/FilterSidebar";
 import SortDropDown from "@/components/product/filter/SortDropDown";
 import PaginationControl from "@/components/product/Pagination/PaginationControl";
@@ -62,7 +38,6 @@ const ProductPage = async (props: PageProps) => {
             Showing {products.length} of {pagination.totalItems} results
           </p>
         </div>
-
         <SortDropDown activeSort={params.sort} />
       </div>
 

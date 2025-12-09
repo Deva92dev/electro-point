@@ -1,4 +1,3 @@
-import { getHeroCard } from "@/lib/imagekit-loader";
 import { CategoryHeroItemType } from "./HeroScrollEffect";
 import Image from "next/image";
 import Link from "next/link";
@@ -11,9 +10,7 @@ const HeroCard = ({
   item: CategoryHeroItemType;
   index: number;
 }) => {
-  const imageUrl = item.imageUrl
-    ? getHeroCard(item.imageUrl)
-    : "/placeholder.jpg";
+  const imageUrl = item.imageUrl || "/placeholder.jpg";
 
   // this directly filters on products page
   const href = `/products?category=${item.productType}`;
@@ -28,6 +25,7 @@ const HeroCard = ({
           preload={index === 0}
           sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
           className="object-cover transition-transform duration-700 ease-out group-hover:scale-110"
+          unoptimized //imagekit already optimizing
         />
         <div className="absolute inset-0 bg-linear-to-t from-black/90 via-black/20 to-transparent opacity-60 transition-opacity duration-500 group-hover:opacity-80" />
         {/* 5. CONTENT OVERLAY */}

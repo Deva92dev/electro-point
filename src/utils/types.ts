@@ -104,13 +104,6 @@ export interface ProductsGridType {
   id: number;
   name: string;
   slug: string;
-  productType:
-    | "laptop"
-    | "smartphone"
-    | "headphones"
-    | "tablet"
-    | "smartwatch"
-    | "tv";
   availableColors:
     | {
         name: string;
