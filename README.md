@@ -112,14 +112,14 @@ Dividers (e.g., <hr> tags).
 
 ### Cache Life
 
-| Profile | Use Case               | Revalidate | Best For Your App             |
-| ------- | ---------------------- | ---------- | ----------------------------- |
-| seconds | Real-time data         | 1 second   | Live inventory, flash sales   |
-| minutes | Frequently updated     | 1 minute   | ✅ Products, pricing          |
-| hours   | Multiple daily updates | 1 hour     | ✅ Categories, featured items |
-| days    | Daily updates          | 1 day      | Blog posts, static pages      |
-| weeks   | Weekly updates         | 1 week     | Newsletters, podcasts         |
-| max     | Rarely changes         | 30 days    | Terms, privacy policy         |
+Profile Use Case stale revalidate expire
+default Standard content 5 minutes 15 minutes 1 year
+seconds Real-time data 30 seconds 1 second 1 minute
+minutes Frequently updated content 5 minutes 1 minute 1 hour
+hours Content updated multiple times per day 5 minutes 1 hour 1 day
+days Content updated daily 5 minutes 1 day 1 week
+weeks Content updated weekly 5 minutes 1 week 30 days
+max Stable content that rarely changes 5 minutes 30 days 1 year
 
 ### Database performance
 
@@ -128,6 +128,8 @@ Dividers (e.g., <hr> tags).
 - Use db.select() for complex aggregations, analytics, or when performance is absolutely critical and you only need 2 columns out of 50.
 
 ### System Performance
+
+- If you mark a data fetch as "use server", technically anyone can send a POST request to that function. If you write it in a normal file, it is internal only. It can never be called from the outside world.
 
 - Import (src/assets): Optimization works + Automatic Size + Automatic Blur + Cache Busting. Superior. for static images
 

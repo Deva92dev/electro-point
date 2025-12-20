@@ -1,18 +1,61 @@
 "use client";
-import { Button } from "@/components/ui/button";
-import { ProductsGridType } from "@/utils/types";
-import { ShoppingCart } from "lucide-react";
+
 import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
+import FavoriteToggle from "../FavoriteToggle";
+import AddToCart from "@/components/cart/AddToCart";
 
+export interface ProductTypes {
+  isFavorite: boolean;
+  mainImagePath: string;
+  variants: {
+    id: number;
+    color: string | null;
+    image: string;
+    stock: number;
+  }[];
+  id: number;
+  name: string;
+  slug: string;
+  availableColors:
+    | {
+        name: string;
+        hex: string;
+      }[]
+    | null;
+  basePrice: string;
+  salePrice: string | null;
+  brand: {
+    name: string;
+  } | null;
+  category: {
+    name: string;
+  };
+}
 interface Props {
-  product: ProductsGridType;
+  product: ProductTypes;
+  isAuthenticated: boolean;
 }
 
-const ProductCard = ({ product }: Props) => {
+const ProductCard = ({ product, isAuthenticated }: Props) => {
   const [activeImage, setActiveImage] = useState(product.mainImagePath);
   const [hoveredColor, setHoveredColor] = useState<string | null>(null);
+
+  // If hovering a color, pick that. If not, pick the one matching the active image. If neither, fallback to the first variant.
+  const selectedVariant =
+    product.variants.find((v) => v.color === hoveredColor) ||
+    product.variants.find((v) => v.image === activeImage) ||
+    product.variants[0];
+
+  const variantForCart = selectedVariant
+    ? {
+        id: selectedVariant.id,
+        image: selectedVariant.image,
+        stock: selectedVariant.stock,
+        color: selectedVariant.color ?? undefined, // Converts null -> undefined
+      }
+    : undefined;
 
   return (
     <div className="group flex flex-col h-full space-y-3">
@@ -33,11 +76,29 @@ const ProductCard = ({ product }: Props) => {
             SALE
           </div>
         )}
+
+        {isAuthenticated && (
+          <div className="absolute top-2 right-2 z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+            {/* added opacity-0 group-hover:opacity-100 so it doesn't clutter the view until interaction */}
+            <FavoriteToggle
+              productId={product.id}
+              initialIsFavorite={!!product.isFavorite}
+            />
+          </div>
+        )}
         {/* QUICK ADD BUTTON */}
-        <div className="absolute bottom-4 right-4 translate-y-4 opacity-0 transition-all duration-300 group-hover:translate-y-0 group-hover:opacity-100">
-          <Button size="icon" className="rounded-full shadow-lg h-10 w-10">
-            <ShoppingCart className="w-4 h-4" />
-          </Button>
+        <div className="absolute bottom-4 right-4 translate-y-4 opacity-0 transition-all duration-300 group-hover:translate-y-0 group-hover:opacity-100 z-20">
+          <AddToCart
+            product={{
+              id: product.id,
+              name: product.name,
+              basePrice: product.basePrice,
+              salePrice: product.salePrice,
+            }}
+            selectedVariant={variantForCart}
+            currentImage={activeImage}
+            className="rounded-full shadow-lg h-10 w-10 p-0"
+          />
         </div>
       </Link>
 

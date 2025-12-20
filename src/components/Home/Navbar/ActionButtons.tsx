@@ -11,15 +11,16 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { signOut, useSession } from "@/lib/auth-client";
+import { useCartStore } from "@/store/cart-store";
 import {
   Box,
+  HeartIcon,
   Loader,
   LogOut,
   Monitor,
   Moon,
   ShoppingCart,
   Sun,
-  User,
 } from "lucide-react";
 import { useTheme } from "next-themes";
 import Link from "next/link";
@@ -27,6 +28,11 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
 const ActionButtons = () => {
+  const count = useCartStore((state) =>
+    state.items.reduce((total, item) => total + item.quantity, 0)
+  );
+  const toggleCart = useCartStore((state) => state.toggleCart);
+
   const { theme, setTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
   const router = useRouter();
@@ -47,7 +53,7 @@ const ActionButtons = () => {
     await signOut({
       fetchOptions: {
         onSuccess: () => {
-          router.push("/login");
+          router.push("/");
         },
       },
     });
@@ -78,10 +84,15 @@ const ActionButtons = () => {
       <Button
         variant="ghost"
         size="icon"
-        className="relative text-muted-foreground hover:text-foreground"
+        onClick={toggleCart}
+        className="relative text-muted-foreground hover:text-foreground cursor-pointer"
       >
         <ShoppingCart className="w-5 h-5" />
-        <span className="absolute top-1 right-1 w-2 h-2 bg-destructive rounded-full" />
+        {mounted && count > 0 && (
+          <span className="absolute -top-1 -right-1 w-5 h-5 bg-primary text-primary-foreground text-[10px] font-bold flex items-center justify-center rounded-full animate-in zoom-in">
+            {count}
+          </span>
+        )}
       </Button>
 
       {/* Auth Logic */}
@@ -123,11 +134,11 @@ const ActionButtons = () => {
             <DropdownMenuSeparator />
             <DropdownMenuItem asChild>
               <Link
-                href="/profile"
+                href="/favorites"
                 className="cursor-pointer w-full flex items-center"
               >
-                <User className="mr-2 w-4 h-4" />
-                <span>Profile</span>
+                <HeartIcon className="mr-2 w-4 h-4" />
+                <span>Favorites</span>
               </Link>
             </DropdownMenuItem>
             <DropdownMenuItem asChild>
@@ -153,12 +164,12 @@ const ActionButtons = () => {
         // GUEST STATE
         <div className="flex items-center gap-2">
           <Link href="/login">
-            <Button variant="ghost" className="font-semibold">
+            <Button variant="ghost" className="font-semibold cursor-pointer">
               Log In
             </Button>
           </Link>
           <Link href="/signup">
-            <Button className="font-semibold bg-primary text-primary-foreground hover:bg-primary/90 rounded-full px-6">
+            <Button className="font-semibold bg-primary text-primary-foreground hover:bg-primary/90 rounded-full px-6 cursor-pointer">
               Sign Up
             </Button>
           </Link>

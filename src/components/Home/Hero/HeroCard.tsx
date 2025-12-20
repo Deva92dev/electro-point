@@ -13,14 +13,14 @@ const HeroCard = ({
   const imageUrl = item.imageUrl || "/placeholder.jpg";
 
   // this directly filters on products page
-  const href = `/products?category=${item.productType}`;
+  const href = `/products?productType=${item.productType}`;
 
   return (
     <Link href={href} key={item.id} className="group relative block">
       <div className="relative w-hero-card-md h-[400px] md:w-hero-card-2xl md:h-hero-card-lg rounded-4xl overflow-hidden bg-muted border border-white/10 shadow-sm transition-shadow duration-500 hover:shadow-2xl">
         <Image
           src={imageUrl}
-          alt={item.name}
+          alt={item.alt}
           fill
           preload={index === 0}
           sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"

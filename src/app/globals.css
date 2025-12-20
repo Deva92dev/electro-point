@@ -1,4 +1,6 @@
 @import "tailwindcss";
+
+@plugin "tailwindcss-animate";
 @import "./styles/tokens.css";
 @import "./styles/utilities.css";
 @import "./styles/animations.css";

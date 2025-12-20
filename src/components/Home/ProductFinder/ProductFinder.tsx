@@ -1,5 +1,5 @@
 import dynamic from "next/dynamic";
-import { getCategories } from "@/utils/actions";
+import { getCategories } from "@/utils/actions/actions";
 import ProductAIFinder from "./ProductAIFinder";
 import { Category } from "@/utils/types";
 
@@ -13,6 +13,7 @@ const Product3D = dynamic(() => import("./Product3D"), {
 
 const ProductFinder = async () => {
   const categories: Category[] = await getCategories();
+  console.log(categories);
 
   return (
     <section

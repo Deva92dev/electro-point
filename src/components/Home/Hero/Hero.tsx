@@ -1,8 +1,8 @@
-import { getCategoriesWithImages } from "@/components/j-curve-mastery/data";
 import HeroScrollEffect from "./HeroScrollEffect";
+import { getHeroImages } from "@/utils/actions/actions";
 
 const Hero = async () => {
-  const categoryResults = (await getCategoriesWithImages()).slice(3, 9);
+  const categoryResults = await getHeroImages();
 
   return (
     <section className="w-full pt-8 pb-12 md:pt-12 md:pb-24 overflow-hidden">

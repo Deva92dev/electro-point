@@ -45,9 +45,9 @@ const ProductFinderModal = ({
   if (!isOpen || !mounted) return null;
 
   const modalContent = (
-    <div className="fixed inset-0 z-[100] flex flex-col bg-background/95 backdrop-blur-md animate-in fade-in duration-300">
+    <div className="fixed inset-0 z-100 flex flex-col bg-background/95 backdrop-blur-md animate-in fade-in duration-300">
       {/* header */}
-      <div className="flex items-center justify-between p-6 border-b border-border/40 flex-shrink-0">
+      <div className="flex items-center justify-between p-6 border-b border-border/40 shrink-0">
         <div>
           <h2 className="text-2xl font-bold">Your Perfect Match</h2>
           <p className="text-muted-foreground text-sm">

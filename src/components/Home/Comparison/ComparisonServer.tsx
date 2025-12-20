@@ -1,4 +1,4 @@
-import { getProductForComparison } from "@/utils/actions";
+import { getProductForComparison } from "@/utils/actions/actions";
 import SpecWarsClient from "./SpecWarsClient";
 
 const ComparisonServer = async () => {

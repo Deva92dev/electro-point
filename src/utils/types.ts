@@ -1,89 +1,57 @@
 import { products } from "@/db/schema";
-import { getAllProducts, getHeroImages, getProductsFinder } from "./actions";
+import { StaticImageData } from "next/image";
+import { getHeroImages, getProductById } from "./actions/actions";
 
-export type HeroImage = Awaited<ReturnType<typeof getHeroImages>>[number];
-export interface category {
-  id: number;
-  name: string;
-  productType: string | null;
-  imageUrl?: string | null;
-}
+/** Inferred directly from Drizzle Schema to prevent drift */
+export type ProductType = (typeof products.productType.enumValues)[number];
 
-export type Category = {
-  imageUrl: string;
-  id: number;
-  name: string;
-  productType:
-    | "laptop"
-    | "smartphone"
-    | "headphones"
-    | "tablet"
-    | "smartwatch"
-    | "tv";
-};
-
-export const categoryTypes = [
+export const categoryTypes: ProductType[] = [
   "laptop",
   "smartphone",
   "headphones",
   "tablet",
   "smartwatch",
   "tv",
-] as const;
+];
 
-export type ProductsFinderData = Awaited<ReturnType<typeof getProductsFinder>>;
-export type ProductFinderItem = ProductsFinderData[number];
+/** Used for AI Finder quick comparisons.*/
+export type SpecRecord = Record<string, string | number | boolean | undefined>;
 
-export interface ProductFinderData {
+/** Unified for the Hero and Quiz components*/
+export interface Category {
   id: number;
   name: string;
-  mainImagePath: string | null;
-  basePrice: string;
-  salePrice?: string | null;
-  productType: string;
-  quickSpecs: Record<string, string | undefined>;
-  categoryName: string;
+  productType: ProductType;
+  imageUrl: string | StaticImageData;
 }
 
-export type ProductType = (typeof products.productType.enumValues)[number];
-
-export type FilteredProduct = {
-  id: string;
+/**
+ * 4. FILTERED PRODUCT (FOR AI FINDER)
+ * FIXED: ID changed to number to match PostgreSQL Serial type.
+ */
+export interface FilteredProduct {
+  id: number;
   name: string;
   mainImagePath: string;
   basePrice: string;
   productType: ProductType;
-  quickSpecs: unknown;
-};
+  quickSpecs: SpecRecord;
+  // Optional relations from the 'with' query
+  laptopSpecs?: SpecRecord | null;
+  smartphoneSpecs?: SpecRecord | null;
+}
 
 export type FilteredProductsType = FilteredProduct[];
 
-export interface ComparisonProduct {
+/** Explicitly defined to prevent circular dependencies with Actions.*/
+export interface ProductCardType {
   id: number;
   name: string;
   slug: string;
-  mainImagePath: string;
-  quickSpecs: Record<string, string | undefined> | null;
-}
-
-// this is how same color equals same image match in db
-
-export interface VariantsType {
-  color: string | null;
-  imagePath: string | null;
-}
-export interface ProductCardType {
   basePrice: string;
-  name: string;
-  productType:
-    | "laptop"
-    | "smartphone"
-    | "headphones"
-    | "tablet"
-    | "smartwatch"
-    | "tv";
   salePrice: string | null;
-  slug: string;
+  productType: ProductType;
+  mainImagePath: string;
   variants: {
     color: string | null;
     imagePath: string | null;
@@ -93,29 +61,13 @@ export interface ProductCardType {
   };
 }
 
-export type GetAllProductsType = Awaited<ReturnType<typeof getAllProducts>>;
-
-export interface ProductsGridType {
-  mainImagePath: string;
-  variants: {
-    color: string | null;
-    image: string;
-  }[];
+export interface ComparisonProduct {
   id: number;
   name: string;
   slug: string;
-  availableColors:
-    | {
-        name: string;
-        hex: string;
-      }[]
-    | null;
-  basePrice: string;
-  salePrice: string | null;
-  brand: {
-    name: string;
-  } | null;
-  category: {
-    name: string;
-  };
+  mainImagePath: string;
+  quickSpecs: SpecRecord | null;
 }
+
+export type ProductDetailsType = Awaited<ReturnType<typeof getProductById>>;
+export type HeroImage = Awaited<ReturnType<typeof getHeroImages>>[number];

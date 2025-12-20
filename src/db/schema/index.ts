@@ -10,6 +10,7 @@ import {
   text,
   timestamp,
   index,
+  uniqueIndex,
 } from "drizzle-orm/pg-core";
 import { relations } from "drizzle-orm";
 
@@ -91,7 +92,6 @@ export const products = pgTable(
     isFeatured: boolean("is_featured").default(false),
     isNewArrival: boolean("is_new_arrival").default(false),
     isBestseller: boolean("is_bestseller").default(false),
-    stockQuantity: integer("stock_quantity").default(0), // if no variants
     metaTitle: text("meta_title"),
     metaDescription: text("meta_description"),
     averageRating: real("average_rating").default(0),
@@ -518,7 +518,7 @@ export const reviews = pgTable(
     productId: integer("product_id")
       .references(() => products.id, { onDelete: "cascade" })
       .notNull(),
-    userId: text("user_id"),
+    userId: text("user_id").references(() => user.id),
     userName: text("user_name").notNull(),
     userEmail: text("user_email"),
     rating: integer("rating").notNull(),
@@ -569,7 +569,7 @@ export const wishlists = pgTable(
   "wishlists",
   {
     id: serial("id").primaryKey(),
-    userId: text("user_id").notNull(),
+    userId: text("user_id").notNull(), // Better-Auth user ID
     productId: integer("product_id")
       .references(() => products.id, { onDelete: "cascade" })
       .notNull(),
@@ -578,6 +578,11 @@ export const wishlists = pgTable(
   (table) => [
     index("wishlist_user_id_idx").on(table.userId),
     index("wishlist_product_id_idx").on(table.productId),
+    // FIXED: A user can only have a product once in their wishlist
+    uniqueIndex("wishlist_user_product_unique").on(
+      table.userId,
+      table.productId
+    ),
   ]
 );
 
@@ -601,13 +606,20 @@ export const session = pgTable(
   {
     id: text("id").primaryKey(),
     expiresAt: timestamp("expires_at").notNull(),
+    token: text("token").notNull().unique(),
     ipAddress: text("ip_address"),
     userAgent: text("user_agent"),
-    userId: text("user_di")
+    userId: text("user_id")
       .notNull()
       .references(() => user.id),
+
+    createdAt: timestamp("created_at").notNull(),
+    updatedAt: timestamp("updated_at").notNull(),
   },
-  (table) => [index("session_user_id_idx").on(table.userId)]
+  (table) => [
+    index("session_user_id_idx").on(table.userId),
+    index("session_token_idx").on(table.token),
+  ]
 );
 
 export const account = pgTable(
@@ -622,8 +634,15 @@ export const account = pgTable(
     accessToken: text("access_token"),
     refreshToken: text("refresh_token"),
     idToken: text("id_token"),
+
+    // OAuth metadata
+    accessTokenExpiresAt: timestamp("access_token_expires_at"),
+    refreshTokenExpiresAt: timestamp("refresh_token_expires_at"),
+    scope: text("scope"),
+
     password: text("password"),
-    expiresAt: timestamp("expires_at"),
+    createdAt: timestamp("created_at").notNull(),
+    updatedAt: timestamp("updated_at").notNull(),
   },
   (table) => [index("account_user_id_idx").on(table.userId)]
 );
@@ -633,9 +652,131 @@ export const verification = pgTable("verification", {
   identifier: text("identifier").notNull(),
   value: text("value").notNull(),
   expiresAt: timestamp("expires_at").notNull(),
+  createdAt: timestamp("created_at"),
+  updatedAt: timestamp("updated_at"),
+});
+
+// carts
+export const cart = pgTable("cart", {
+  id: serial("id").primaryKey(),
+  userId: text("user_id").references(() => user.id, { onDelete: "cascade" }),
+  // For guests,  use a session cookie ID, but for V1 rely on local storage for guests.
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const cartItems = pgTable(
+  "cart_items",
+  {
+    id: serial("id").primaryKey(),
+    cartId: integer("cart_id")
+      .references(() => cart.id, { onDelete: "cascade" })
+      .notNull(),
+    productId: integer("product_id")
+      .references(() => products.id, { onDelete: "cascade" })
+      .notNull(),
+    // variantId should be NotNull to ensure every cart item points to a specific SKU
+    variantId: integer("variant_id")
+      .references(() => productVariants.id)
+      .notNull(),
+    quantity: integer("quantity").default(1).notNull(),
+    // Price snapshotting to detect price changes before checkout
+    priceAtAdd: decimal("price_at_add", { precision: 10, scale: 2 }).notNull(),
+  },
+  (table) => [
+    index("cart_item_cart_idx").on(table.cartId),
+    index("cart_item_product_idx").on(table.productId),
+    // Prevents duplicate rows for the same variant in one cart
+    uniqueIndex("cart_item_unique_variant").on(table.cartId, table.variantId),
+  ]
+);
+
+// orders
+export const orderStatusEnum = pgEnum("order_status", [
+  "pending",
+  "processing",
+  "shipped",
+  "delivered",
+  "cancelled",
+  "refunded",
+]);
+
+export const paymentStatusEnum = pgEnum("payment_status", [
+  "pending",
+  "paid",
+  "failed",
+  "refunded",
+]);
+
+export const orders = pgTable("orders", {
+  id: serial("id").primaryKey(),
+  userId: text("user_id").references(() => user.id), // can be null for guest
+  guestEmail: text("guest_email"), // Fallback for guest checkout
+  totalAmount: decimal("total_amount", { precision: 10, scale: 2 }).notNull(),
+  status: orderStatusEnum("status").default("pending").notNull(),
+  paymentStatus: paymentStatusEnum("payment_status")
+    .default("pending")
+    .notNull(),
+  //Addresses (You might want separate address tables later, but JSONB is fast for V1)
+  shippingAddress: jsonb("shipping_address").notNull(),
+  billingAddress: jsonb("billing_address"),
+
+  stripePaymentIntentId: text("stripe_payment_intent_id").unique(),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const orderItems = pgTable("order_items", {
+  id: serial("id").primaryKey(),
+  orderId: integer("order_id")
+    .references(() => orders.id, { onDelete: "cascade" })
+    .notNull(),
+  productId: integer("product_id")
+    .references(() => products.id)
+    .notNull(),
+  variantId: integer("variant_id")
+    .references(() => productVariants.id)
+    .notNull(),
+
+  quantity: integer("quantity").notNull(),
+  price: decimal("price", { precision: 10, scale: 2 }).notNull(), // Snapshot of price at purchase time
 });
 
 // RELATIONS
+export const ordersRelations = relations(orders, ({ one, many }) => ({
+  user: one(user, { fields: [orders.userId], references: [user.id] }),
+  items: many(orderItems),
+}));
+
+export const orderItemsRelations = relations(orderItems, ({ one }) => ({
+  order: one(orders, { fields: [orderItems.orderId], references: [orders.id] }),
+  product: one(products, {
+    fields: [orderItems.productId],
+    references: [products.id],
+  }),
+  variant: one(productVariants, {
+    fields: [orderItems.variantId],
+    references: [productVariants.id],
+  }),
+}));
+
+export const cartsRelations = relations(cart, ({ one, many }) => ({
+  user: one(user, { fields: [cart.userId], references: [user.id] }),
+  items: many(cartItems),
+}));
+
+export const cartItemsRelations = relations(cartItems, ({ one }) => ({
+  cart: one(cart, { fields: [cartItems.cartId], references: [cart.id] }),
+  product: one(products, {
+    fields: [cartItems.productId],
+    references: [products.id],
+  }),
+  variant: one(productVariants, {
+    fields: [cartItems.variantId],
+    references: [productVariants.id],
+  }),
+}));
+
 export const categoriesRelations = relations(categories, ({ many }) => ({
   products: many(products),
 }));

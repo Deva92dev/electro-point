@@ -3,22 +3,22 @@
 import { useState, useTransition } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { category, FilteredProductsType } from "@/utils/types";
-import { getFilteredProducts } from "@/utils/actions";
+import { Category, FilteredProductsType } from "@/utils/types";
 import ProductFinderModal from "./ProductFinderModal";
+import { getFilteredProducts } from "@/utils/actions/mutations";
 
 interface Props {
-  categories: category[];
+  categories: Category[];
 }
-
+// this imports "use cache directive"
 const QUIZ_STEPS = 3;
 const MIN_BUDGET = 10000;
 const MAX_BUDGET = 1000000;
 
 const ProductAIFinder = ({ categories }: Props) => {
   const [step, setStep] = useState(1);
-  const [selectedCategoryName, setSelectedCategoryName] = useState<
-    string | null
+  const [selectedType, setSelectedType] = useState<
+    Category["productType"] | null
   >(null);
   const [maxBudget, setMaxBudget] = useState<number>(500000);
   const [priority, setPriority] = useState<string | null>(null);
@@ -43,7 +43,7 @@ const ProductAIFinder = ({ categories }: Props) => {
     startTransition(async () => {
       try {
         const filters = {
-          categoryName: selectedCategoryName,
+          productType: selectedType,
           maxBudget: maxBudget,
           priority: priority,
         };
@@ -94,16 +94,16 @@ const ProductAIFinder = ({ categories }: Props) => {
                   {categories.map((cat) => (
                     <Button
                       key={cat.id}
-                      onClick={() => setSelectedCategoryName(cat.productType)}
+                      onClick={() => setSelectedType(cat.productType)}
                       variant="outline"
                       className={`h-auto py-4 flex flex-col gap-2 border transition-all duration-200 ${
-                        selectedCategoryName === cat.productType
+                        selectedType === cat.productType
                           ? "border-primary bg-primary/10 text-primary shadow-[0_0_15px_rgba(var(--primary),0.2)]"
                           : "border-gray-700/5 bg-white/5 hover:bg-white/10 hover:border-gray-700/20 text-muted-foreground hover:text-foreground"
                       }`}
                     >
                       <span className="capitalize text-base font-medium">
-                        {cat.productType}
+                        {`${cat.productType}s`}
                       </span>
                     </Button>
                   ))}
@@ -194,8 +194,7 @@ const ProductAIFinder = ({ categories }: Props) => {
               <Button
                 onClick={nextQuiz}
                 disabled={
-                  (step === 1 && !selectedCategoryName) ||
-                  (step === 3 && !priority)
+                  (step === 1 && !selectedType) || (step === 3 && !priority)
                 }
                 className="px-8 font-semibold shadow-lg shadow-primary/20"
               >

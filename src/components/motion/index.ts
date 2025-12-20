@@ -9,6 +9,8 @@ import {
   useSpring,
   useMotionValue,
   MotionValue,
+  TargetAndTransition,
+  AnimatePresence,
 } from "motion/react";
 
 export {
@@ -19,6 +21,9 @@ export {
   useTransform,
   useSpring,
   useMotionValue,
+  AnimatePresence,
 };
+
+export type { TargetAndTransition };
 
 export type { MotionValue };

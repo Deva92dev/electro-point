@@ -1,11 +1,11 @@
-import { ProductsGridType } from "@/utils/types";
-import ProductList from "./ProductList";
+import ProductCard, { ProductTypes } from "./ProductCard";
 
 interface Props {
-  products: ProductsGridType[];
+  products: ProductTypes[];
+  isAuthenticated: boolean;
 }
 
-const ProductsGrid = ({ products }: Props) => {
+const ProductsGrid = ({ products, isAuthenticated }: Props) => {
   if (products.length === 0) {
     return (
       <div className="h-96 flex flex-col items-center justify-center border-2 border-dashed border-border rounded-xl bg-muted/10">
@@ -19,7 +19,17 @@ const ProductsGrid = ({ products }: Props) => {
     );
   }
 
-  return <ProductList products={products} />;
+  return (
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 animate-in fade-in duration-500">
+      {products.map((product) => (
+        <ProductCard
+          key={product.id}
+          product={product}
+          isAuthenticated={isAuthenticated}
+        />
+      ))}
+    </div>
+  );
 };
 
 export default ProductsGrid;

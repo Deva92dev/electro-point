@@ -34,7 +34,7 @@ const Services = () => {
               key={index}
               className="flex flex-col sm:flex-row items-center sm:items-start text-center sm:text-left gap-4 group"
             >
-              <div className="flex-shrink-0 relative">
+              <div className="shrink-0 relative">
                 <div className="absolute inset-0 bg-primary blur-xl opacity-20 group-hover:opacity-40 transition-opacity" />
                 <div className="relative h-12 w-12 rounded-2xl bg-primary flex items-center justify-center shadow-lg shadow-primary/20 group-hover:-translate-y-1 transition-transform duration-300">
                   <service.icon className="h-6 w-6 text-primary-foreground" />

@@ -38,12 +38,12 @@ const Footer = () => {
             Experience the future of technology today. Join thousands of
             satisfied tech enthusiasts.
           </p>
-          <Button
-            size="lg"
-            className="h-12 px-8 md:h-14 md:px-10 rounded-full text-base md:text-lg font-semibold bg-background text-foreground hover:bg-primary hover:text-white transition-all duration-300 transform hover:scale-105 shadow-[0_0_20px_rgba(255,255,255,0.3)] hover:shadow-[0_0_30px_rgba(var(--primary),0.6)]"
+          <Link
+            href="/products"
+            className="h-12 px-8 md:h-14 md:px-10 rounded-full text-base md:text-lg font-semibold bg-background text-foreground hover:bg-primary hover:text-white transition-all duration-300 transform hover:scale-105 shadow-[0_0_20px_rgba(255,255,255,0.3)] hover:shadow-[0_0_30px_rgba(var(--primary),0.6)] flex flex-row gap-2 items-center justify-center"
           >
             Shop Now <ArrowRight className="ml-2 w-4 h-4 md:w-5 md:h-5" />
-          </Button>
+          </Link>
         </div>
 
         <div className="w-full h-px bg-white/10 mb-12 md:mb-16" />

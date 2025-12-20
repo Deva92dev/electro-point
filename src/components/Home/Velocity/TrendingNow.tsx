@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { getBentoGridProducts } from "@/utils/actions";
+import { getBentoGridProducts } from "@/utils/actions/actions";
 import { ArrowRight, Star, Timer } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
@@ -43,7 +43,7 @@ const TrendingNow = async () => {
             <Link
               href={`/products/${featured.id}`}
               className="
-                group relative overflow-hidden bg-card border border-border shadow-sm hover:shadow-lg transition-all duration-300 rounded-(--radius-xl)
+                group relative overflow-hidden bg-card border border-border shadow-sm hover:shadow-lg transition-all duration-300 rounded-xl
                 col-span-1 md:col-span-2 lg:row-span-2
                 h-[450px] lg:h-auto
               "
@@ -82,7 +82,7 @@ const TrendingNow = async () => {
             <Link
               href={`/products/${highestRated.id}`}
               className="
-                group relative overflow-hidden bg-card border border-border shadow-sm hover:shadow-lg transition-all duration-300 rounded-(--radius-xl)
+                group relative overflow-hidden bg-card border border-border shadow-sm hover:shadow-lg transition-all duration-300 rounded-xl
                 col-span-1 lg:row-span-2
                 h-[450px] lg:h-auto
               "
@@ -127,7 +127,7 @@ const TrendingNow = async () => {
             <Link
               href={`/products/${flashDeal.id}`}
               className="
-                group relative overflow-hidden bg-destructive/5 border border-destructive/20 hover:border-destructive/50 transition-all duration-300 rounded-(--radius-xl)
+                group relative overflow-hidden bg-destructive/5 border border-destructive/20 hover:border-destructive/50 transition-all duration-300 rounded-xl
                 col-span-1 lg:row-span-1
                 h-hero-card-base lg:h-auto
               "
@@ -168,7 +168,7 @@ const TrendingNow = async () => {
             <Link
               href={`/products/${accessory.id}`}
               className="
-                group relative overflow-hidden bg-secondary/30 border border-secondary hover:border-primary/30 transition-all duration-300 rounded-(--radius-xl)
+                group relative overflow-hidden bg-secondary/30 border border-secondary hover:border-primary/30 transition-all duration-300 rounded-xl
                 col-span-1 lg:row-span-1
                 h-hero-card-base lg:h-auto
               "

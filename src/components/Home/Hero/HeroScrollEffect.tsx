@@ -3,12 +3,13 @@
 import { m, useScroll, useTransform } from "@/components/motion";
 import { useRef } from "react";
 import HeroCard from "./HeroCard";
+import { StaticImageData } from "next/image";
 
 export interface CategoryHeroItemType {
   id: number;
-  name: string;
+  imageUrl: string | StaticImageData;
+  alt: string;
   productType: string;
-  imageUrl: string;
 }
 
 interface Props {

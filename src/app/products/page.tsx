@@ -1,9 +1,16 @@
+import { Suspense } from "react";
+import { headers } from "next/headers";
 import FilterSidebar from "@/components/product/filter/FilterSidebar";
 import SortDropDown from "@/components/product/filter/SortDropDown";
+import GeneralHero from "@/components/product/Hero/GeneralHero";
+import ServerHero from "@/components/product/Hero/ServerHero";
 import PaginationControl from "@/components/product/Pagination/PaginationControl";
 import ProductsGrid from "@/components/product/ProductCard/ProductsGrid";
-import { getAllProducts, getFilterOptions } from "@/utils/actions";
-import { Suspense } from "react";
+import { getAllProducts, getFilterOptions } from "@/utils/actions/actions";
+import { auth } from "@/lib/auth";
+import { getUserWishlistIds } from "@/utils/actions/mutations";
+import WishlistSync from "@/components/global/WishlistSync";
+
 type PageProps = {
   searchParams: Promise<{
     page?: string;
@@ -20,16 +27,36 @@ type PageProps = {
 
 const ProductPage = async (props: PageProps) => {
   const params = await props.searchParams;
-  const [data, filterOptions] = await Promise.all([
+  const session = await auth.api.getSession({
+    headers: await headers(),
+  });
+  const isAuthenticated = !!session?.user;
+  const userId = session?.user.id as string;
+
+  const [data, filterOptions, wishlistIds] = await Promise.all([
     getAllProducts(params),
     getFilterOptions(),
+    isAuthenticated && userId
+      ? getUserWishlistIds(userId)
+      : Promise.resolve([]),
   ]);
 
   const { products, pagination } = data;
   const { brands, categories } = filterOptions;
 
+  const wishlistSet = new Set(wishlistIds);
+  const productsWithFavorites = products.map((p) => ({
+    ...p,
+    isFavorite: wishlistSet.has(p.id),
+  }));
+
   return (
-    <main className="min-h-screen bg-background pt-24 pb-12 px-4">
+    <main className="min-h-screen bg-background pb-12">
+      {params.category ? (
+        <ServerHero categorySlug={params.category} />
+      ) : (
+        <GeneralHero />
+      )}
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
@@ -41,7 +68,7 @@ const ProductPage = async (props: PageProps) => {
         <SortDropDown activeSort={params.sort} />
       </div>
 
-      <div className="flex flex-col lg:flex-row gap-8">
+      <div className="flex flex-col lg:flex-row gap-8 pl-4">
         <aside className="w-full lg:w-64 shrink-0">
           <Suspense
             fallback={
@@ -57,7 +84,10 @@ const ProductPage = async (props: PageProps) => {
         </aside>
 
         <div className="flex-1 border border-border mask-box p-8">
-          <ProductsGrid products={products} />
+          <ProductsGrid
+            products={productsWithFavorites}
+            isAuthenticated={isAuthenticated}
+          />
 
           <div className="mt-12 flex justify-center">
             <PaginationControl
@@ -67,6 +97,8 @@ const ProductPage = async (props: PageProps) => {
           </div>
         </div>
       </div>
+
+      <WishlistSync wishlistIds={wishlistIds} />
     </main>
   );
 };

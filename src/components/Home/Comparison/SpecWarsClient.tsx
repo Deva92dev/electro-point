@@ -10,6 +10,9 @@ interface Props {
   products: ComparisonProduct[];
 }
 
+type SpecValue = string | number | boolean | undefined;
+
+// fix this
 const SPEC_ORDER = [
   { key: "processor", label: "Chipset", isNumeric: false },
   { key: "ram", label: "RAM", isNumeric: true, unit: "GB" },
@@ -21,9 +24,12 @@ const SPEC_ORDER = [
 ];
 
 // Helper to extract numbers from strings (e.g. "12GB" -> 12)
-const extractNumber = (val: string | undefined) => {
-  if (!val) return 0;
-  const match = val.match(/(\d+)/);
+const extractNumber = (val: SpecValue): number => {
+  if (val === undefined || val === null) return 0;
+  if (typeof val === "boolean") return val ? 1 : 0; // Handle boolean if erroneously marked numeric
+  if (typeof val === "number") return val;
+  // Safe string regex match
+  const match = String(val).match(/(\d+)/);
   return match ? parseInt(match[0], 10) : 0;
 };
 
@@ -33,8 +39,8 @@ const ComparisonBar = ({
   rivalValue,
   isNumeric,
 }: {
-  activeValue: string | undefined;
-  rivalValue: string | undefined;
+  activeValue: SpecValue;
+  rivalValue: SpecValue;
   isNumeric: boolean;
 }) => {
   if (!isNumeric) return null;
@@ -73,7 +79,10 @@ const ComparisonBar = ({
 
 const AnimatedText = ({ value }: { value: string | undefined }) => {
   return (
-    <span className="block animate-in slide-in-from-bottom-2 fade-in duration-300 key={value}">
+    <span
+      className="block animate-in slide-in-from-bottom-2 fade-in duration-300"
+      key={value}
+    >
       {value || "N/A"}
     </span>
   );
@@ -89,7 +98,7 @@ const SpecWarsClient = ({ products }: Props) => {
   if (!activeProduct || !compareProduct) return null;
 
   return (
-    <div className="w-full flex flex-col lg:flex-row bg-zinc-950 rounded-[var(--radius-xl)] shadow-2xl overflow-hidden border border-white/10 text-white">
+    <div className="w-full flex flex-col lg:flex-row bg-zinc-950 rounded-xl shadow-2xl overflow-hidden border border-white/10 text-white">
       {/* LEFT SIDE: Controls (Sticky) */}
       <div className="lg:w-2/5 p-8 lg:p-12 border-b lg:border-b-0 lg:border-r border-white/10 bg-zinc-900/50 backdrop-blur-md sticky top-0 lg:h-auto flex flex-col justify-between">
         <div>
@@ -176,15 +185,18 @@ const SpecWarsClient = ({ products }: Props) => {
         {/* Table Body */}
         <div className="divide-y divide-white/5">
           {SPEC_ORDER.map((spec, idx) => {
-            const val1 = activeProduct.quickSpecs?.[spec.key];
-            const val2 = compareProduct.quickSpecs?.[spec.key];
+            const rawV1 = activeProduct.quickSpecs?.[spec.key];
+            const rawV2 = compareProduct.quickSpecs?.[spec.key];
+
+            const v1 = rawV1 !== undefined ? String(rawV1) : undefined;
+            const v2 = rawV2 !== undefined ? String(rawV2) : undefined;
 
             return (
               <div
                 key={spec.key}
                 // FIX 3: Alternating backgrounds for readability
-                className={`grid grid-cols-12 gap-4 px-8 py-6 items-center transition-colors hover:bg-white/[0.02] ${
-                  idx % 2 === 0 ? "bg-transparent" : "bg-white/[0.02]"
+                className={`grid grid-cols-12 gap-4 px-8 py-6 items-center transition-colors hover:bg-white/2 ${
+                  idx % 2 === 0 ? "bg-transparent" : "bg-white/2"
                 }`}
               >
                 {/* Label */}
@@ -197,17 +209,17 @@ const SpecWarsClient = ({ products }: Props) => {
                   <div className="flex justify-between items-center mb-1">
                     {/* Active Value (Big, White) */}
                     <span className="text-lg font-bold text-white">
-                      <AnimatedText value={val1} />
+                      <AnimatedText value={v1} />
                     </span>
                     <span className="text-sm font-mono text-zinc-600">
-                      {val2 || "—"}
+                      {v2 || "—"}
                     </span>
                   </div>
 
                   {spec.isNumeric && (
                     <ComparisonBar
-                      activeValue={val1}
-                      rivalValue={val2}
+                      activeValue={rawV1}
+                      rivalValue={rawV2}
                       isNumeric={spec.isNumeric}
                     />
                   )}

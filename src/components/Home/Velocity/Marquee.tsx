@@ -54,8 +54,8 @@ const Marquee = () => {
   return (
     <div className="w-full py-12 overflow-hidden bg-background/80 border-y border-border relative z-10">
       {/* Gradient Masks using semantic 'background' color */}
-      <div className="absolute top-0 left-0 w-32 h-full bg-gradient-to-r from-background to-transparent z-20 pointer-events-none" />
-      <div className="absolute top-0 right-0 w-32 h-full bg-gradient-to-l from-background to-transparent z-20 pointer-events-none" />
+      <div className="absolute top-0 left-0 w-32 h-full bg-linear-to-r from-background to-transparent z-20 pointer-events-none" />
+      <div className="absolute top-0 right-0 w-32 h-full bg-linear-to-l from-background to-transparent z-20 pointer-events-none" />
 
       {/* Row 1: Scrolling Left */}
       <div className="flex mb-8 w-max min-w-full pause-on-hover">
