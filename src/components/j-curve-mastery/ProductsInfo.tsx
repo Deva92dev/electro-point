@@ -6,7 +6,17 @@ interface Props {
 }
 
 const ProductsInfo = ({ product }: Props) => {
-  console.log(product);
+  if (!product) return <div> There is no data</div>;
+  if (!product.variants || product.variants.length === 0)
+    return <div>Out of Stock</div>;
+
+  const data = product.variants.map((v) => ({
+    image: v.imagePath,
+    id: v.id,
+    color: v.color,
+    price: Number(v.price),
+  }));
+
   return (
     <aside className="flex flex-col gap-4">
       <div className="flex flex-col md:flex-row items-center gap-12">
@@ -26,7 +36,15 @@ const ProductsInfo = ({ product }: Props) => {
           </span>
         ))}
 
-      <AddToCart product={product} />
+      {data[0] && (
+        <AddToCart
+          name={product.name}
+          id={data[0].id}
+          color={data[0].color as string}
+          price={data[0].price}
+          image={data[0].image as string}
+        />
+      )}
     </aside>
   );
 };

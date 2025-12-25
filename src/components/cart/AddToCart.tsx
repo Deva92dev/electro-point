@@ -4,8 +4,10 @@ import { CartItem, useCartStore } from "@/store/cart-store";
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { Check, ShoppingCart } from "lucide-react";
+import { Check, ShoppingCart, Loader2 } from "lucide-react";
 import { usePathname } from "next/navigation";
+import { toast } from "sonner";
+import { addToCartServer } from "@/utils/actions/mutations";
 
 interface Props {
   product: {
@@ -13,8 +15,8 @@ interface Props {
     name: string;
     basePrice: string;
     salePrice: string | null;
-    stock?: number; // Added optional stock for single-SKU products
-    lowStockThreshold?: number; // Added optional threshold
+    stock?: number;
+    lowStockThreshold?: number;
   };
   selectedVariant?: {
     id?: number;
@@ -23,7 +25,7 @@ interface Props {
     stock?: number;
     lowStockThreshold?: number;
   };
-  currentImage: string; // image currently shown on screen
+  currentImage: string;
   className?: string;
   children?: React.ReactNode;
 }
@@ -37,19 +39,22 @@ const AddToCart = ({
 }: Props) => {
   const addItem = useCartStore((state) => state.addItem);
   const [isAdded, setIsAdded] = useState(false);
+  // Add loading state for server sync
+  const [isLoading, setIsLoading] = useState(false);
   const pathname = usePathname();
 
-  // Determine Effective Stock & Threshold
   const effectiveStock = selectedVariant?.stock ?? product.stock ?? 5;
   const effectiveThreshold =
     selectedVariant?.lowStockThreshold ?? product.lowStockThreshold ?? 5;
   const isOutOfStock = effectiveStock === 0;
 
-  const handleAddProduct = (e: React.MouseEvent) => {
+  const handleAddProduct = async (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
 
-    if (isOutOfStock) return;
+    if (isOutOfStock || isLoading) return;
+
+    setIsLoading(true);
 
     const price = product.salePrice
       ? Number(product.salePrice)
@@ -67,10 +72,18 @@ const AddToCart = ({
       lowStockThreshold: effectiveThreshold,
     };
 
+    // Optimistic UI Update (Fast)
     addItem(itemToAdd);
 
-    // fallback animation
-    setIsAdded(true);
+    try {
+      await addToCartServer(product.id, selectedVariant?.id, 1);
+      setIsAdded(true);
+    } catch (err) {
+      console.error("Server sync failed", err);
+      toast.error("Could not save to account (Guest mode)");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   useEffect(() => {
@@ -78,15 +91,16 @@ const AddToCart = ({
     if (isAdded) {
       timeout = setTimeout(() => setIsAdded(false), 2000);
     }
-    return () => clearTimeout(timeout); // Cleanup on unmount
+    return () => clearTimeout(timeout);
   }, [isAdded]);
 
   const renderContent = () => {
+    if (isLoading) return <Loader2 className="w-5 h-5 animate-spin" />;
+
     if (children) return children;
     if (pathname === "/products")
       return <ShoppingCart className="w-5 h-5 cursor-pointer" />;
 
-    // If out of stock
     if (isOutOfStock) return "Out of Stock";
 
     return (
@@ -100,7 +114,7 @@ const AddToCart = ({
     <Button
       size="lg"
       onClick={handleAddProduct}
-      disabled={isOutOfStock || isAdded} // Disable if OOS or currently animating
+      disabled={isOutOfStock || isAdded || isLoading}
       className={cn(
         "relative transition-all duration-300 overflow-hidden cursor-pointer",
         isAdded ? "bg-green-600 hover:bg-green-700 text-white" : "",

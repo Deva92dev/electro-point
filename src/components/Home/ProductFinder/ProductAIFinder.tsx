@@ -6,21 +6,22 @@ import { Input } from "@/components/ui/input";
 import { Category, FilteredProductsType } from "@/utils/types";
 import ProductFinderModal from "./ProductFinderModal";
 import { getFilteredProducts } from "@/utils/actions/mutations";
+import { formatPrice } from "@/utils/util";
 
 interface Props {
   categories: Category[];
 }
-// this imports "use cache directive"
+
 const QUIZ_STEPS = 3;
-const MIN_BUDGET = 10000;
-const MAX_BUDGET = 1000000;
+const MIN_BUDGET = 20;
+const MAX_BUDGET = 5000;
 
 const ProductAIFinder = ({ categories }: Props) => {
   const [step, setStep] = useState(1);
   const [selectedType, setSelectedType] = useState<
     Category["productType"] | null
   >(null);
-  const [maxBudget, setMaxBudget] = useState<number>(500000);
+  const [maxBudget, setMaxBudget] = useState<number>(5000);
   const [priority, setPriority] = useState<string | null>(null);
 
   const [isPending, startTransition] = useTransition();
@@ -121,7 +122,7 @@ const ProductAIFinder = ({ categories }: Props) => {
                     type="range"
                     min={MIN_BUDGET}
                     max={MAX_BUDGET}
-                    step={10000}
+                    step={20}
                     value={maxBudget}
                     onChange={(e) => setMaxBudget(Number(e.target.value))}
                     className="w-full h-2 bg-white/10 rounded-lg appearance-none cursor-pointer accent-primary"
@@ -132,7 +133,7 @@ const ProductAIFinder = ({ categories }: Props) => {
                         Min
                       </span>
                       <span className="font-mono">
-                        ₹{MIN_BUDGET.toLocaleString()}
+                        {formatPrice(MIN_BUDGET)}
                       </span>
                     </div>
                     <div className="w-px h-8 bg-white/10" />
@@ -141,7 +142,7 @@ const ProductAIFinder = ({ categories }: Props) => {
                         Max
                       </span>
                       <span className="font-mono text-xl text-primary font-bold">
-                        ₹{maxBudget.toLocaleString()}
+                        {formatPrice(maxBudget)}
                       </span>
                     </div>
                   </div>

@@ -60,7 +60,6 @@ export const getUniqueColors = async () => {
 };
 
 export const getAllProduct = async (colors: string) => {
-  // const start = performance.now();
   const allProducts = await db.query.products.findMany({
     where: colors
       ? (products, { sql }) =>
@@ -87,13 +86,6 @@ export const getAllProduct = async (colors: string) => {
       },
     },
   });
-
-  // const end = performance.now();
-
-  // console.log(
-  //   `⚡ [Database] getProductsByColor took ${(end - start).toFixed(2)}ms`
-  // );
-  // console.log(`   📦 Items fetched: ${allProducts.length}`);
 
   return allProducts;
 };

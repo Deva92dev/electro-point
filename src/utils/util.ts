@@ -16,3 +16,21 @@ export const transformedProductImage = (
   if (loader === "details") return getProductDetails(encoded);
   return getProductCard(encoded);
 };
+
+export const formatPrice = (price: number | string) => {
+  return new Intl.NumberFormat("en-US", {
+    style: "currency",
+    currency: "USD",
+  })
+    .format(Number(price))
+    .replace("$", "$ ");
+};
+
+export const formatDate = (date: Date | null) => {
+  if (!date) return "";
+  return new Intl.DateTimeFormat("en-IN", {
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+  }).format(date);
+};

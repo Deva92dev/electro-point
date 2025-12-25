@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useState } from "react";
 import FavoriteToggle from "../FavoriteToggle";
 import AddToCart from "@/components/cart/AddToCart";
+import { formatPrice } from "@/utils/util";
 
 export interface ProductTypes {
   isFavorite: boolean;
@@ -53,7 +54,7 @@ const ProductCard = ({ product, isAuthenticated }: Props) => {
         id: selectedVariant.id,
         image: selectedVariant.image,
         stock: selectedVariant.stock,
-        color: selectedVariant.color ?? undefined, // Converts null -> undefined
+        color: selectedVariant.color ?? undefined,
       }
     : undefined;
 
@@ -79,7 +80,6 @@ const ProductCard = ({ product, isAuthenticated }: Props) => {
 
         {isAuthenticated && (
           <div className="absolute top-2 right-2 z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-            {/* added opacity-0 group-hover:opacity-100 so it doesn't clutter the view until interaction */}
             <FavoriteToggle
               productId={product.id}
               initialIsFavorite={!!product.isFavorite}
@@ -113,15 +113,15 @@ const ProductCard = ({ product, isAuthenticated }: Props) => {
           {product.salePrice ? (
             <>
               <span className="font-bold text-destructive">
-                ₹{parseFloat(product.salePrice).toLocaleString()}
+                {formatPrice(parseFloat(product.salePrice))}
               </span>
               <span className="text-muted-foreground line-through text-sm">
-                ₹{parseFloat(product.basePrice).toLocaleString()}
+                {formatPrice(parseFloat(product.basePrice))}
               </span>
             </>
           ) : (
             <span className="font-bold">
-              ₹{parseFloat(product.basePrice).toLocaleString()}
+              {formatPrice(parseFloat(product.basePrice))}
             </span>
           )}
         </div>

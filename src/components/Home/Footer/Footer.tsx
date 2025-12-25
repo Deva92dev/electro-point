@@ -1,4 +1,3 @@
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ArrowRight, Facebook, Instagram, Send, Twitter } from "lucide-react";
 import Link from "next/link";
@@ -28,7 +27,7 @@ const Footer = () => {
   return (
     <footer className="w-full bg-foreground text-background pt-12 pb-8 md:pt-24 md:pb-12 overflow-hidden">
       <div className="max-w-7xl mx-auto px-4">
-        {/* TOP HALF: Call to Adventure */}
+        {/* Top half: Call to Adventure */}
         <div className="flex flex-col items-center text-center mb-12 md:mb-24 space-y-6 md:space-y-8">
           <h2 className="text-5xl md:text-7xl lg:text-9xl font-extrabold tracking-tighter uppercase leading-[0.9]">
             Ready to <br />
@@ -47,7 +46,7 @@ const Footer = () => {
         </div>
 
         <div className="w-full h-px bg-white/10 mb-12 md:mb-16" />
-        {/* BOTTOM HALF: Links & Newsletter */}
+        {/* Bottom Half : Links & Newsletter */}
         <div className="grid grid-cols-1 gap-10 md:grid-cols-12 md:gap-y-12 lg:gap-12">
           {/* BRAND */}
           <div className="col-span-1 md:col-span-6 lg:col-span-4 space-y-4 md:space-y-6 text-center md:text-left">

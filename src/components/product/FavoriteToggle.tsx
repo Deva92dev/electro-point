@@ -18,7 +18,7 @@ interface Props {
 const FavoriteToggle = ({ initialIsFavorite, productId, className }: Props) => {
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
-  const pathname = usePathname(); // <--- 1. Get current path
+  const pathname = usePathname();
 
   const isFavorite = useWishlistStore((state) =>
     state.wishlistIds.includes(productId)
@@ -41,7 +41,6 @@ const FavoriteToggle = ({ initialIsFavorite, productId, className }: Props) => {
     }
 
     try {
-      //
       const result = await toggleWishlistAction(productId, pathname);
 
       // Handle Auth Failure

@@ -4,14 +4,8 @@ import AddToCart from "@/components/cart/AddToCart";
 import FavoriteToggle from "@/components/product/FavoriteToggle";
 import { Button } from "@/components/ui/button";
 import { ProductDetailsType } from "@/utils/types";
-import {
-  Cpu,
-  HardDrive,
-  Monitor,
-  Share2,
-  ShieldCheck,
-  ShoppingCart,
-} from "lucide-react";
+import { formatPrice } from "@/utils/util";
+import { Cpu, HardDrive, Monitor, Share2, ShieldCheck } from "lucide-react";
 import { useState } from "react";
 
 interface InfoProps {
@@ -58,19 +52,18 @@ const ProductInfo = ({ product, isFavorite = false }: InfoProps) => {
             {product.salePrice ? (
               <div className="flex items-baseline gap-4">
                 <span className="text-3xl font-bold text-primary">
-                  ₹{parseFloat(product.salePrice).toLocaleString()}
+                  {formatPrice(parseFloat(product.salePrice))}
                 </span>
                 <span className="text-lg text-muted-foreground line-through">
-                  ₹{parseFloat(product.basePrice).toLocaleString()}
+                  {formatPrice(parseFloat(product.basePrice))}
                 </span>
               </div>
             ) : (
               <span className="text-3xl font-bold text-primary">
-                ₹{parseFloat(product.basePrice).toLocaleString()}
+                {formatPrice(parseFloat(product.basePrice))}
               </span>
             )}
           </div>
-          {/* PRAGMATIC FIX: Add Color Selector for Layout A */}
           {/* Users need to pick a color before adding to cart */}
           {product.availableColors && product.availableColors.length > 0 && (
             <div className="flex items-center gap-3 mt-2">
@@ -107,7 +100,7 @@ const ProductInfo = ({ product, isFavorite = false }: InfoProps) => {
           )}
         </div>
       </div>
-      {/* 2. Key Features Grid (Quick Specs) */}
+      {/* Key Features Grid (Quick Specs) */}
       <div className="grid grid-cols-2 gap-4">
         <div className="rounded-2xl p-4 bg-muted/30 border border-border flex flex-col gap-2">
           <Cpu className="w-5 h-5 text-primary" />
@@ -139,7 +132,6 @@ const ProductInfo = ({ product, isFavorite = false }: InfoProps) => {
           </span>
         </div>
       </div>
-      {/* 3. Actions */}
       <div className="space-y-4 pt-4 border-t border-border">
         <AddToCart
           product={{

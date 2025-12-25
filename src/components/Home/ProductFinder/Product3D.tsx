@@ -6,11 +6,14 @@ import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
 import { ShoppingCart, Info, Star, Box } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import Link from "next/link";
+import { formatPrice } from "@/utils/util";
 
 const PRODUCT_DETAILS = {
+  id: 35,
   name: "Sony WH-1000XM5",
-  price: 29990,
-  discountPrice: 24990,
+  price: 346.0,
+  discountPrice: 288.0,
   rating: 4.8,
   reviews: 2150,
   specs: ["30hr Battery", "Noise Cancelling", "Hi-Res Audio"],
@@ -33,7 +36,7 @@ const Product3D = () => {
   useEffect(() => {
     if (!mountRef.current) return;
 
-    // A. Scene & Renderer
+    // Scene & Renderer
     const width = mountRef.current.clientWidth;
     const height = mountRef.current.clientHeight;
 
@@ -51,11 +54,11 @@ const Product3D = () => {
 
     mountRef.current.appendChild(renderer.domElement);
 
-    // B. Camera
+    // Camera
     const camera = new THREE.PerspectiveCamera(45, width / height, 0.1, 100);
     camera.position.set(3, 1.5, 4);
 
-    // C. Controls
+    // Controls
     const controls = new OrbitControls(camera, renderer.domElement);
     controls.enableDamping = true;
     controls.dampingFactor = 0.05;
@@ -65,7 +68,7 @@ const Product3D = () => {
     controls.minPolarAngle = Math.PI / 4;
     controls.maxPolarAngle = Math.PI / 1.8;
 
-    // D. Lighting (Studio Setup)
+    // Lighting (Studio Setup)
     const ambientLight = new THREE.AmbientLight(0xffffff, 1);
     scene.add(ambientLight);
     const dirLight = new THREE.DirectionalLight(0xffffff, 2);
@@ -75,7 +78,7 @@ const Product3D = () => {
     rimLight.position.set(-5, 5, -5);
     scene.add(rimLight);
 
-    // E. Load Model
+    // Load Model
     const loader = new GLTFLoader();
     loader.load(
       "/Sony.glb",
@@ -102,7 +105,7 @@ const Product3D = () => {
       }
     );
 
-    // F. Animation Loop
+    // Animation Loop
     let animationId: number;
     const animate = () => {
       animationId = requestAnimationFrame(animate);
@@ -111,7 +114,7 @@ const Product3D = () => {
     };
     animate();
 
-    // G. Handle Resize
+    // Handle Resize
     const handleResize = () => {
       if (!mountRef.current) return;
       const w = mountRef.current.clientWidth;
@@ -122,7 +125,7 @@ const Product3D = () => {
     };
     window.addEventListener("resize", handleResize);
 
-    // H. Cleanup
+    // Cleanup
     return () => {
       window.removeEventListener("resize", handleResize);
       cancelAnimationFrame(animationId);
@@ -200,10 +203,10 @@ const Product3D = () => {
             </h2>
             <div className="flex items-baseline gap-3 mb-6">
               <span className="text-3xl font-bold text-white">
-                ₹{PRODUCT_DETAILS.discountPrice.toLocaleString()}
+                {formatPrice(PRODUCT_DETAILS.discountPrice)}
               </span>
               <span className="text-lg text-gray-500 line-through">
-                ₹{PRODUCT_DETAILS.price.toLocaleString()}
+                {formatPrice(PRODUCT_DETAILS.price)}
               </span>
             </div>
             {/* Controls */}
@@ -235,12 +238,9 @@ const Product3D = () => {
                   <ShoppingCart className="w-4 h-4" />
                   Add to Cart
                 </Button>
-                <Button
-                  variant="outline"
-                  className="flex-1 gap-2 border-white/30 text-white hover:bg-white/10 hover:text-white bg-transparent"
-                >
+                <Button className="flex-1 gap-2 border-white/30 text-white hover:bg-white/10 hover:text-white bg-transparent">
                   <Info className="w-4 h-4" />
-                  Details
+                  <Link href={`/products/${PRODUCT_DETAILS.id}`}>Details</Link>
                 </Button>
                 <Button
                   variant="ghost"

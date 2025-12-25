@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { signOut, useSession } from "@/lib/auth-client";
 import { useCartStore } from "@/store/cart-store";
+import { getCart } from "@/utils/actions/mutations";
 import {
   Box,
   HeartIcon,
@@ -32,6 +33,8 @@ const ActionButtons = () => {
     state.items.reduce((total, item) => total + item.quantity, 0)
   );
   const toggleCart = useCartStore((state) => state.toggleCart);
+  const syncWithServer = useCartStore((state) => state.syncWithServer);
+  const isSynced = useCartStore((state) => state.isSynced);
 
   const { theme, setTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
@@ -42,6 +45,25 @@ const ActionButtons = () => {
   useEffect(() => {
     setMounted(true);
   }, []);
+
+  // When session exists, fetch DB state
+  useEffect(() => {
+    const syncCart = async () => {
+      if (session?.user && !isSynced) {
+        try {
+          const serverItems = await getCart();
+          // If server items exist (or empty array), force update local store
+          if (serverItems) {
+            syncWithServer(serverItems);
+          }
+        } catch (error) {
+          console.error("Failed to sync cart:", error);
+        }
+      }
+    };
+
+    syncCart();
+  }, [session, syncWithServer, isSynced]);
 
   const handleTheme = () => {
     if (theme === "light") setTheme("dark");
@@ -61,7 +83,6 @@ const ActionButtons = () => {
 
   return (
     <div className="flex items-center gap-3">
-      {/* theme toggle */}
       <Button
         variant="ghost"
         size="icon"
@@ -101,7 +122,7 @@ const ActionButtons = () => {
           <Loader className="w-4 h-4 animate-spin text-muted-foreground" />
         </div>
       ) : session ? (
-        // LOGGED IN STATE: Dropdown Menu
+        // Logged in State
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button
@@ -161,7 +182,7 @@ const ActionButtons = () => {
           </DropdownMenuContent>
         </DropdownMenu>
       ) : (
-        // GUEST STATE
+        // guest state
         <div className="flex items-center gap-2">
           <Link href="/login">
             <Button variant="ghost" className="font-semibold cursor-pointer">

@@ -3,10 +3,11 @@
 import { useState } from "react";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
-import { ShoppingCart, Share2, Star } from "lucide-react";
+import { Share2, Star } from "lucide-react";
 import { ProductDetailsType } from "@/utils/types";
 import FavoriteToggle from "@/components/product/FavoriteToggle";
 import AddToCart from "@/components/cart/AddToCart";
+import { formatPrice } from "@/utils/util";
 
 interface Props {
   product: NonNullable<ProductDetailsType>;
@@ -107,7 +108,7 @@ const HeroConfigurator = ({ product, isFavorite = false }: Props) => {
 
             <div className="flex items-center gap-4">
               <span className="text-2xl font-light">
-                ₹{parseFloat(product.basePrice).toLocaleString()}
+                {formatPrice(parseFloat(product.basePrice))}
               </span>
               {product.salePrice && (
                 <span className="px-2 py-1 bg-destructive/10 text-destructive text-xs font-bold rounded">

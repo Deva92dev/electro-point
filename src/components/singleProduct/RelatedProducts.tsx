@@ -4,6 +4,7 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { getRelatedProducts } from "@/utils/actions/actions";
 import { ProductDetailsType } from "@/utils/types";
+import { formatPrice } from "@/utils/util";
 
 interface Props {
   currentProduct: NonNullable<ProductDetailsType>;
@@ -90,7 +91,7 @@ const RelatedProducts = async ({ currentProduct }: Props) => {
               <div className="mt-3 group-hover:opacity-50 transition-opacity">
                 <h3 className="font-medium text-sm truncate">{prod.name}</h3>
                 <p className="text-sm text-muted-foreground">
-                  ₹{parseFloat(prod.basePrice).toLocaleString()}
+                  {formatPrice(parseFloat(prod.basePrice))}
                 </p>
               </div>
             </Link>

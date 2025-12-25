@@ -10,7 +10,6 @@ import {
   MotionValue,
 } from "@/components/motion";
 
-// --- LENIS CONTEXT TYPES ---
 interface LenisContextType {
   scrollY: MotionValue<number>;
   scrollYProgress: MotionValue<number>;
@@ -20,13 +19,12 @@ interface LenisContextType {
 
 const LenisContext = createContext<LenisContextType | null>(null);
 
-// --- MAIN PROVIDER COMPONENT ---
 export const ClientProviders = ({
   children,
 }: {
   children: React.ReactNode;
 }) => {
-  // 1. Motion Logic: Reduced Motion Check
+  // Motion Logic: Reduced Motion Check
   const [shouldAnimate, setShouldAnimate] = useState(true);
 
   useEffect(() => {
@@ -38,7 +36,7 @@ export const ClientProviders = ({
     return () => mediaQuery.removeEventListener("change", handleChange);
   }, []);
 
-  // 2. Lenis Logic: Scroll Physics State
+  // Lenis Logic: Scroll Physics State
   const scrollY = useMotionValue(0);
   const scrollYProgress = useMotionValue(0);
   const velocity = useMotionValue(0);
@@ -46,7 +44,6 @@ export const ClientProviders = ({
 
   useEffect(() => {
     // Optional: Only initialize Lenis if not mobile/touch to save battery?
-    // For now, we keep it consistent.
     const lenis = new Lenis({
       lerp: 0.1,
       smoothWheel: true,
@@ -89,24 +86,19 @@ export const ClientProviders = ({
       <LenisContext.Provider
         value={{ scrollY, velocity, direction, scrollYProgress }}
       >
-        {/* MERGED: ThemeProvider lives here now */}
         <NextThemesProvider
           attribute="class"
           defaultTheme="system"
           enableSystem
           disableTransitionOnChange
         >
-          {/* FUTURE: <QueryClientProvider client={queryClient}> */}
           {children}
-          {/* <Toaster /> */}
-          {/* </QueryClientProvider> */}
         </NextThemesProvider>
       </LenisContext.Provider>
     </LazyMotion>
   );
 };
 
-// --- EXPORT HOOK ---
 export const useLenis = () => {
   const ctx = useContext(LenisContext);
   if (!ctx) throw new Error("useLenis must be used within ClientProviders");

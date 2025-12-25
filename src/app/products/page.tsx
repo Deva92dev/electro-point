@@ -52,8 +52,8 @@ const ProductPage = async (props: PageProps) => {
 
   return (
     <main className="min-h-screen bg-background pb-12">
-      {params.category ? (
-        <ServerHero categorySlug={params.category} />
+      {params.productType ? (
+        <ServerHero categorySlug={params.productType} />
       ) : (
         <GeneralHero />
       )}

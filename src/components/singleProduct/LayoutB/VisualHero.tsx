@@ -8,6 +8,7 @@ import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import FavoriteToggle from "@/components/product/FavoriteToggle";
 import AddToCart from "@/components/cart/AddToCart";
+import { formatPrice } from "@/utils/util";
 
 type Props = {
   product: NonNullable<ProductDetailsType>;
@@ -108,7 +109,7 @@ const VisualHero = ({ product, isFavorite = false }: Props) => {
           </div>
 
           <div className="text-3xl font-light text-white">
-            ₹{parseFloat(product.basePrice).toLocaleString()}
+            {formatPrice(parseFloat(product.basePrice))}
           </div>
 
           <div className="flex flex-wrap justify-center lg:justify-start gap-3">

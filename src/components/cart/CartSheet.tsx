@@ -9,6 +9,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { validateCart } from "@/utils/actions/mutations";
 import SearchInput from "./SearchInput";
+import { formatPrice } from "@/utils/util";
 
 const CartSheet = () => {
   const {
@@ -45,7 +46,7 @@ const CartSheet = () => {
     }
   };
 
-  // FAST LOCAL FILTERING
+  // LOCAL FILTERING
   const filteredItems = useMemo(() => {
     if (!searchQuery) return items;
     const lowerQuery = searchQuery.toLowerCase();
@@ -62,7 +63,6 @@ const CartSheet = () => {
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           onClick={toggleCart}
-          // FIXED: Increased blur to 'md'
           className="fixed inset-0 z-100 bg-black/60 backdrop-blur-md"
         >
           <m.div
@@ -71,7 +71,6 @@ const CartSheet = () => {
             exit={{ x: "100%" }}
             transition={{ type: "spring", damping: 25, stiffness: 200 }}
             onClick={(e) => e.stopPropagation()}
-            // FIXED: Increased width to 'max-w-lg' (approx 500px)
             className="fixed right-0 top-0 z-101 h-full w-full max-w-lg border-l border-border bg-background shadow-2xl flex flex-col"
           >
             {/* Header */}
@@ -242,7 +241,7 @@ const CartSheet = () => {
                           </div>
 
                           <p className="font-bold text-sm">
-                            ₹{(i.price * i.quantity).toLocaleString()}
+                            {formatPrice(i.price * i.quantity)}
                           </p>
                         </div>
                       </div>
@@ -257,7 +256,7 @@ const CartSheet = () => {
               <div className="border-t border-border p-6 space-y-4 bg-muted/10">
                 <div className="flex justify-between items-center text-lg font-bold">
                   <span>Total</span>
-                  <span>₹{getCartTotal().toLocaleString()}</span>
+                  <span>{formatPrice(getCartTotal())}</span>
                 </div>
                 {!isSynced && (
                   <div className="text-xs text-orange-500 bg-orange-500/10 p-2 rounded text-center animate-pulse">
@@ -275,7 +274,7 @@ const CartSheet = () => {
                   <Button
                     size="lg"
                     disabled={!isSynced || isValidating}
-                    className="w-full font-bold text-base h-12 shadow-lg shadow-primary/20"
+                    className="w-full font-bold text-base h-12 shadow-lg shadow-primary/20 cursor-pointer"
                   >
                     {isValidating ? "Validating Cart..." : "Checkout Now"}
                   </Button>

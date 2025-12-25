@@ -79,6 +79,7 @@ export const products = pgTable(
       .$type<{ name: string; hex: string }[]>()
       .default([]),
     productType: productTypes("product_type").notNull(),
+    stock: integer("stock").default(0).notNull(),
     mainImagePath: text("main_image_path"),
     basePrice: decimal("base_price", { precision: 10, scale: 2 }).notNull(),
     salePrice: decimal("sale_price", { precision: 10, scale: 2 }),
@@ -676,9 +677,7 @@ export const cartItems = pgTable(
       .references(() => products.id, { onDelete: "cascade" })
       .notNull(),
     // variantId should be NotNull to ensure every cart item points to a specific SKU
-    variantId: integer("variant_id")
-      .references(() => productVariants.id)
-      .notNull(),
+    variantId: integer("variant_id").references(() => productVariants.id),
     quantity: integer("quantity").default(1).notNull(),
     // Price snapshotting to detect price changes before checkout
     priceAtAdd: decimal("price_at_add", { precision: 10, scale: 2 }).notNull(),
@@ -734,9 +733,7 @@ export const orderItems = pgTable("order_items", {
   productId: integer("product_id")
     .references(() => products.id)
     .notNull(),
-  variantId: integer("variant_id")
-    .references(() => productVariants.id)
-    .notNull(),
+  variantId: integer("variant_id").references(() => productVariants.id),
 
   quantity: integer("quantity").notNull(),
   price: decimal("price", { precision: 10, scale: 2 }).notNull(), // Snapshot of price at purchase time

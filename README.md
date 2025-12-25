@@ -166,4 +166,6 @@ max Stable content that rarely changes 5 minutes 30 days 1 year
 
   - SQL Injection: Never write ${value} inside a raw string. Always use the ${value} interpolation provided by sql tag so Drizzle sanitizes it.
 
+  - drizzle-orm/neon-http, The HTTP driver is "stateless"—it fires a request and forgets about it immediately. It cannot "hold the phone line open" to perform a transaction.
+
 ## Random for now

@@ -15,7 +15,6 @@ const Dropdown = () => {
       <Button variant="ghost" size="icon" onClick={toggleMenu}>
         {isOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
       </Button>
-
       {/* Mobile Menu Overlay */}
       {isOpen && (
         <div className="absolute top-20 left-0 w-full bg-background/95 backdrop-blur-xl border-b border-border shadow-2xl px-6 flex flex-col gap-6 animate-in slide-in-from-top-5 fade-in duration-200 z-50">

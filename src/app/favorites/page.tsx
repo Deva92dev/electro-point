@@ -45,13 +45,12 @@ export default async function FavoritesPage() {
             </Link>
           </div>
         ) : (
-          /* Product Grid */
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-6 gap-y-10">
             {products.map((product) => (
               <ProductCard
                 key={product.id}
                 product={product}
-                isAuthenticated={true} // Protected route, user is always auth
+                isAuthenticated={true}
               />
             ))}
           </div>

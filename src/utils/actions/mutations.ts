@@ -2,9 +2,18 @@
 
 // Client-callable server actions, do not use use cache/ cache here
 
-import { and, eq, inArray, lte, sql } from "drizzle-orm";
+import Stripe from "stripe";
+import { and, desc, eq, inArray, lte, sql } from "drizzle-orm";
 import { db } from "@/db";
-import { products, productVariants, wishlists } from "@/db/schema";
+import {
+  cart,
+  cartItems,
+  orderItems,
+  orders,
+  products,
+  productVariants,
+  wishlists,
+} from "@/db/schema";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 import { transformedProductImage } from "../util";
@@ -12,6 +21,10 @@ import { FilteredProductsType, ProductType } from "../types";
 import { CartItem } from "@/store/cart-store";
 import { revalidatePath } from "next/cache";
 import { ProductTypes } from "@/components/product/ProductCard/ProductCard";
+
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
+  apiVersion: "2025-12-15.clover",
+});
 
 export const getFilteredProducts = async (filters: {
   productType?: string | null;
@@ -169,6 +182,137 @@ export const getUserWishlistProducts = async (): Promise<ProductTypes[]> => {
   });
 };
 
+export async function getCart() {
+  const session = await auth.api.getSession({
+    headers: await headers(),
+  });
+
+  if (!session?.user) {
+    return null;
+  }
+
+  const userId = session.user.id;
+
+  //  Fetch the Cart from the Database
+  const userCart = await db.query.cart.findFirst({
+    where: eq(cart.userId, userId),
+    with: {
+      items: {
+        with: {
+          product: true,
+          variant: true,
+        },
+      },
+    },
+  });
+
+  // If no cart exists, Webhook deleted it
+  if (!userCart) {
+    return [];
+  }
+
+  return userCart.items.map((item) => {
+    // Check if it's a Variant or Simple Product
+    const isVariant = !!item.variant;
+    const entity = isVariant ? item.variant! : item.product;
+
+    return {
+      productId: item.productId,
+      variantId: item.variantId || undefined,
+      name:
+        item.product.name +
+        (isVariant ? ` - ${item.variant!.variantName}` : ""),
+      price: Number(item.priceAtAdd),
+      image:
+        (isVariant ? item.variant!.imagePath : item.product.mainImagePath) ||
+        "",
+      quantity: item.quantity,
+      maxStock: isVariant ? item.variant!.stockQuantity : item.product.stock,
+      color: isVariant ? item.variant!.color || "Default" : "Default",
+    };
+  });
+}
+
+export const addToCartServer = async (
+  productId: number,
+  variantId: number | undefined,
+  quantity: number
+) => {
+  const session = await auth.api.getSession({
+    headers: await headers(),
+  });
+
+  if (!session?.user) {
+    return { success: false, message: "Guest user" };
+  }
+
+  const userId = session.user.id;
+
+  try {
+    // Find or Create Cart
+    let userCart = await db.query.cart.findFirst({
+      where: eq(cart.userId, userId),
+    });
+
+    if (!userCart) {
+      const inserted = await db.insert(cart).values({ userId }).returning();
+      userCart = inserted[0];
+      if (!userCart) throw new Error("Failed to create cart");
+    }
+
+    // FETCH REAL PRICE (Fixes the 'priceAtAdd' error & Security)
+    let currentPrice = "0";
+
+    if (variantId) {
+      const variant = await db.query.productVariants.findFirst({
+        where: eq(productVariants.id, variantId),
+      });
+      // Fallback logic matches your frontend logic
+      if (variant) {
+        currentPrice = (variant.salePrice || variant.price).toString();
+      }
+    } else {
+      const product = await db.query.products.findFirst({
+        where: eq(products.id, productId),
+      });
+      if (product) {
+        currentPrice = (product.salePrice || product.basePrice).toString();
+      }
+    }
+
+    // Check for existing item in cart
+    const existingItem = await db.query.cartItems.findFirst({
+      where: and(
+        eq(cartItems.cartId, userCart.id),
+        variantId
+          ? eq(cartItems.variantId, variantId)
+          : eq(cartItems.productId, productId)
+      ),
+    });
+
+    if (existingItem) {
+      await db
+        .update(cartItems)
+        .set({ quantity: existingItem.quantity + quantity })
+        .where(eq(cartItems.id, existingItem.id));
+    } else {
+      // INSERT WITH REQUIRED PRICE FIELD
+      await db.insert(cartItems).values({
+        cartId: userCart.id,
+        productId,
+        variantId: variantId ?? null,
+        quantity,
+        priceAtAdd: currentPrice,
+      });
+    }
+
+    return { success: true };
+  } catch (error) {
+    console.error("Failed to sync cart:", error);
+    return { success: false, error };
+  }
+};
+
 export const validateCart = async (
   localItems: CartItem[]
 ): Promise<CartItem[]> => {
@@ -233,3 +377,217 @@ export const validateCart = async (
 
   return validatedItems;
 };
+
+type CheckoutPayload = {
+  shippingAddress: any; // change in production
+};
+
+export const createOrder = async (payload: CheckoutPayload) => {
+  const session = await auth.api.getSession({
+    headers: await headers(),
+  });
+
+  if (!session?.user) throw new Error("Unauthorized");
+  const userId = session.user.id;
+
+  return await db.transaction(async (tx) => {
+    // Cleanup old pending orders
+    const existingOrder = await tx.query.orders.findFirst({
+      where: and(
+        eq(orders.userId, userId),
+        eq(orders.status, "pending"),
+        eq(orders.paymentStatus, "pending")
+      ),
+      with: { items: true },
+    });
+
+    if (existingOrder) {
+      for (const item of existingOrder.items) {
+        if (item.variantId) {
+          // Restore Variant Stock
+          await tx
+            .update(productVariants)
+            .set({
+              stockQuantity: sql`${productVariants.stockQuantity} + ${item.quantity}`,
+            })
+            .where(eq(productVariants.id, item.variantId));
+        } else {
+          // Restore Product Stock
+          await tx
+            .update(products)
+            .set({ stock: sql`${products.stock} + ${item.quantity}` })
+            .where(eq(products.id, item.productId));
+        }
+      }
+      await tx
+        .delete(orderItems)
+        .where(eq(orderItems.orderId, existingOrder.id));
+      await tx.delete(orders).where(eq(orders.id, existingOrder.id));
+    }
+
+    const userCart = await tx.query.cart.findFirst({
+      where: eq(cart.userId, userId),
+      with: {
+        items: {
+          with: {
+            variant: true,
+            product: true,
+          },
+        },
+      },
+    });
+
+    if (!userCart || userCart.items.length === 0)
+      throw new Error("Cart is empty");
+
+    let totalAmount = 0;
+
+    for (const item of userCart.items) {
+      let price = 0;
+
+      if (item.variant) {
+        price = item.variant.salePrice
+          ? Number(item.variant.salePrice)
+          : Number(item.variant.price);
+
+        const result = await tx
+          .update(productVariants)
+          .set({
+            stockQuantity: sql`${productVariants.stockQuantity} - ${item.quantity}`,
+          })
+          .where(
+            sql`${productVariants.id} = ${item.variantId} AND ${productVariants.stockQuantity} >= ${item.quantity}`
+          )
+          .returning({ updatedId: productVariants.id });
+
+        if (!result.length) {
+          tx.rollback();
+          throw new Error(`Out of stock: ${item.variant.variantName}`);
+        }
+      } else {
+        // Accessing product fields
+        price = item.product.salePrice
+          ? Number(item.product.salePrice)
+          : Number(item.product.basePrice);
+
+        // locking for new stock column
+        const result = await tx
+          .update(products)
+          .set({ stock: sql`${products.stock} - ${item.quantity}` })
+          .where(
+            sql`${products.id} = ${item.productId} AND ${products.stock} >= ${item.quantity}`
+          )
+          .returning({ updatedId: products.id });
+
+        if (!result.length) {
+          tx.rollback();
+          throw new Error(`Out of stock: ${item.product.name}`);
+        }
+      }
+
+      totalAmount += price * item.quantity;
+    }
+
+    // Stripe Intent
+    const paymentIntent = await stripe.paymentIntents.create({
+      amount: Math.round(totalAmount * 100),
+      currency: "usd",
+      metadata: { userId, cartId: userCart.id },
+      automatic_payment_methods: { enabled: true },
+    });
+
+    // Create Order
+    const insertedOrders = await tx
+      .insert(orders)
+      .values({
+        userId,
+        totalAmount: totalAmount.toString(),
+        status: "pending",
+        paymentStatus: "pending",
+        stripePaymentIntentId: paymentIntent.id,
+        shippingAddress: payload.shippingAddress,
+      })
+      .returning({ id: orders.id });
+
+    const newOrder = insertedOrders[0];
+    if (!newOrder) {
+      tx.rollback();
+      throw new Error("DB Error");
+    }
+
+    // Insert Order Items
+    await tx.insert(orderItems).values(
+      userCart.items.map((item) => {
+        const finalPrice = item.variant
+          ? item.variant.salePrice || item.variant.price
+          : item.product.salePrice || item.product.basePrice;
+
+        return {
+          orderId: newOrder.id,
+          productId: item.productId,
+          variantId: item.variantId ?? null,
+          quantity: item.quantity,
+          price: finalPrice.toString(),
+        };
+      })
+    );
+
+    return {
+      clientSecret: paymentIntent.client_secret,
+      orderId: newOrder.id,
+    };
+  });
+};
+
+export const getUserOrders = async () => {
+  const session = await auth.api.getSession({
+    headers: await headers(),
+  });
+
+  if (!session?.user) return [];
+
+  const userOrders = await db.query.orders.findMany({
+    where: eq(orders.userId, session.user.id),
+    with: {
+      items: {
+        with: {
+          product: {
+            with: {
+              brand: true,
+            },
+          },
+          variant: true,
+        },
+      },
+    },
+    orderBy: [desc(orders.createdAt)],
+  });
+
+  return userOrders;
+};
+
+export async function getOrderWithRetry(paymentIntentId: string) {
+  // Attempt 1: Immediate fetch
+  let order = await db.query.orders.findFirst({
+    where: eq(orders.stripePaymentIntentId, paymentIntentId),
+    with: { items: { with: { product: true } } },
+  });
+
+  if (order) return order;
+
+  // Attempt 2: Wait 1 second (Handling fast redirects)
+  await new Promise((resolve) => setTimeout(resolve, 1000));
+  order = await db.query.orders.findFirst({
+    where: eq(orders.stripePaymentIntentId, paymentIntentId),
+    with: { items: { with: { product: true } } },
+  });
+
+  if (order) return order;
+
+  // Attempt 3: Wait 2 more seconds (Handling slow webhooks)
+  await new Promise((resolve) => setTimeout(resolve, 2000));
+  return await db.query.orders.findFirst({
+    where: eq(orders.stripePaymentIntentId, paymentIntentId),
+    with: { items: { with: { product: true } } },
+  });
+}

@@ -9,10 +9,6 @@
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) + 4px);
 
-  /* 8-POINT GRID CARD DIMENSIONS
-     Locked into the theme. No more magic numbers.
-     Usage: w-hero-card-md, h-hero-card-lg, etc.
-  */
   --width-hero-card-base: 200px; /* 25 * 8 */
   --height-hero-card-base: 280px; /* 35 * 8 */
 

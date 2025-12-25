@@ -1,5 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { getBentoGridProducts } from "@/utils/actions/actions";
+import { formatPrice } from "@/utils/util";
 import { ArrowRight, Star, Timer } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
@@ -112,7 +113,7 @@ const TrendingNow = async () => {
                 </h4>
                 <div className="flex items-center justify-between mt-2">
                   <span className="text-xl font-bold text-primary">
-                    ₹{parseFloat(highestRated.basePrice).toLocaleString()}
+                    {formatPrice(highestRated.basePrice.toLocaleString())}
                   </span>
                   <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-primary-foreground transition-colors">
                     <ArrowRight className="w-4 h-4" />
@@ -193,8 +194,8 @@ const TrendingNow = async () => {
                 </div>
                 <div>
                   <p className="text-sm font-medium text-muted-foreground mb-1">
-                    Starts at ₹
-                    {parseFloat(accessory.basePrice).toLocaleString()}
+                    Starts at{" "}
+                    {formatPrice(accessory.basePrice.toLocaleString())}
                   </p>
                   <p className="font-bold truncate text-foreground">
                     {accessory.name}

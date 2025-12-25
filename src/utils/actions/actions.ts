@@ -30,12 +30,7 @@ import {
   tags,
 } from "@/db/schema";
 import { categoryTypes, ComparisonProduct } from "../types";
-import {
-  getHeroImage,
-  getProductCard,
-  getProductDetails,
-} from "@/lib/imagekit-loader";
-import { performance } from "perf_hooks";
+import { getHeroImage, getProductCard } from "@/lib/imagekit-loader";
 import { getImagesFromFolder } from "@/db/utils/imagekit-helper";
 import { transformedProductImage } from "../util";
 
@@ -74,6 +69,8 @@ export const getHeroImages = async () => {
 };
 
 export const getCategories = async () => {
+  cacheLife("days");
+
   const result = await db
     .selectDistinctOn([categories.productType], {
       id: categories.id,
@@ -97,39 +94,6 @@ export const getCategories = async () => {
 };
 
 export type getCategoryTypes = Awaited<ReturnType<typeof getCategories>>;
-
-// export const getProductsFinder = async () => {
-//   cacheLife("minutes");
-//   cacheTag("products");
-
-//   const result = await db
-//     .select({
-//       id: products.id,
-//       name: products.name,
-//       mainImagePath: products.mainImagePath,
-//       basePrice: products.basePrice,
-//       salePrice: products.salePrice,
-//       productType: products.productType,
-//       quickSpecs: products.quickSpecs,
-//       categoryName: categories.name,
-//     })
-//     .from(products)
-//     .leftJoin(categories, eq(products.categoryId, categories.id))
-//     .where(and(eq(products.isActive, true), isNotNull(products.mainImagePath)));
-
-//   const processedResult = result.map((prod) => {
-//     const imageUrl = prod.mainImagePath
-//       ? getProductCard(prod.mainImagePath)
-//       : "/placeholder.jpg";
-
-//     return {
-//       ...prod,
-//       mainImagePath: imageUrl,
-//     };
-//   });
-
-//   return processedResult;
-// };
 
 export const getBentoGridProducts = async () => {
   cacheLife("hours");
@@ -217,8 +181,6 @@ export const getProductForComparison = async (): Promise<
   }));
 };
 
-// for jsonb columns
-
 export const getAllProducts = async (params: {
   page?: string;
   sort?: string;
@@ -252,12 +214,7 @@ export const getAllProducts = async (params: {
   if (params.maxPrice) {
     conditions.push(lte(products.basePrice, `${params.maxPrice}`));
   }
-  // By casting the JSONB column to text (::text) and using ILIKE (Case-insensitive Like), we turn the complex object array [{"name": "Space Black", "hex": "#000"}] into a searchable string.
-  // if (params.color) {
-  //   conditions.push(
-  //     sql`${products.availableColors}::text ILIKE ${`%${params.color}%`} `
-  //   );
-  // }
+
   if (params.color) {
     conditions.push(
       sql`${products.availableColors} @> ${JSON.stringify([
@@ -321,6 +278,7 @@ export const getAllProducts = async (params: {
         basePrice: true,
         salePrice: true,
         mainImagePath: true,
+        productType: true,
         availableColors: true,
       },
       with: {
@@ -404,15 +362,33 @@ export const getFilterOptions = async () => {
   return { categories, brands };
 };
 
-export const getCategoryChampion = async (categorySlug: string) => {
+const TYPE_TO_SLUG_MAP: Record<string, string> = {
+  laptop: "ultrabooks",
+  smartphone: "smartphones",
+  tablet: "tablets",
+  smartwatch: "smart-watches",
+  headphones: "headphones",
+  tv: "tvs",
+};
+
+export const getCategoryChampion = async (inputSlug: string) => {
   cacheLife("days");
-  cacheTag(`champion-${categorySlug}`);
+  cacheTag(`champion-${inputSlug}`);
+
+  const lowerInput = inputSlug.toLowerCase();
+  let targetSlug = TYPE_TO_SLUG_MAP[lowerInput] || lowerInput;
 
   const categoryData = await db.query.categories.findFirst({
-    where: eq(categories.slug, categorySlug),
-    columns: { name: true, id: true },
+    where: eq(categories.slug, targetSlug),
+    columns: { name: true, id: true, slug: true },
   });
-  if (!categoryData) return null;
+
+  if (!categoryData) {
+    console.error(
+      `❌ Category not found: ${targetSlug} (Input was: ${inputSlug})`
+    );
+    return null;
+  }
 
   const imageKitResult = await getImagesFromFolder("Category Titan");
   if (!imageKitResult.success || !imageKitResult.files) {
@@ -422,16 +398,26 @@ export const getCategoryChampion = async (categorySlug: string) => {
 
   const normalize = (s: string) => s.toLowerCase().replace(/[-_\s]/g, "");
 
-  const slugNorm = normalize(categorySlug);
   const nameNorm = normalize(categoryData.name);
+  const slugNorm = normalize(categoryData.slug);
+
+  // Also check the SINGULAR version of the product type for image matching
+  const singularType =
+    Object.keys(TYPE_TO_SLUG_MAP).find(
+      (key) => TYPE_TO_SLUG_MAP[key] === targetSlug
+    ) || "";
 
   const titanFile = imageKitResult.files.find((file: any) => {
-    const fileNorm = normalize(file.name);
-    return fileNorm.includes(slugNorm) || fileNorm.includes(nameNorm);
+    const fileName = normalize(file.name);
+    return (
+      fileName.includes(nameNorm) ||
+      fileName.includes(slugNorm) ||
+      (singularType && fileName.includes(singularType))
+    );
   });
 
   if (!titanFile) {
-    console.warn(`⚠️ No Titan image found for category: ${categorySlug}`);
+    console.warn(`⚠️ No Titan image found for: ${targetSlug}`);
     return null;
   }
 

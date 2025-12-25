@@ -7,6 +7,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
+import { formatPrice } from "@/utils/util";
 
 interface ProductFinderModalProps {
   isOpen: boolean;
@@ -51,7 +52,8 @@ const ProductFinderModal = ({
         <div>
           <h2 className="text-2xl font-bold">Your Perfect Match</h2>
           <p className="text-muted-foreground text-sm">
-            Based on {priority} • Under ₹{maxBudget.toLocaleString()}
+            Based on {priority} • Under{" "}
+            {formatPrice(maxBudget.toLocaleString())}
           </p>
         </div>
         <Button
@@ -113,7 +115,7 @@ const ProductFinderModal = ({
                         {prod.name}
                       </h3>
                       <p className="text-lg font-semibold text-primary mb-4">
-                        ₹{parseFloat(prod.basePrice).toLocaleString()}
+                        {formatPrice(parseFloat(prod.basePrice))}
                       </p>
 
                       <div className="mt-auto space-y-3">

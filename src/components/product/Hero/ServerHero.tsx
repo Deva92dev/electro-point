@@ -3,6 +3,7 @@ import { getCategoryChampion } from "@/utils/actions/actions";
 import { ArrowRight } from "lucide-react";
 import Link from "next/link";
 import TitanInteraction from "./TitanInteraction";
+import { formatPrice } from "@/utils/util";
 
 interface Props {
   categorySlug: string;
@@ -10,7 +11,7 @@ interface Props {
 
 const ServerHero = async ({ categorySlug }: Props) => {
   const champion = await getCategoryChampion(categorySlug);
-  if (!champion) return null;
+  if (!champion) return [];
 
   return (
     <section className="relative w-full h-[85vh] min-h-[600px] max-h-[900px] bg-black overflow-hidden flex items-center justify-center">
@@ -52,7 +53,7 @@ const ServerHero = async ({ categorySlug }: Props) => {
             </Link>
             {champion.price && (
               <span className="text-white/60 font-mono text-sm">
-                Starting at ₹{Number(champion.price).toLocaleString()}
+                Starting at {formatPrice(Number(champion.price))}
               </span>
             )}
           </div>

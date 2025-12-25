@@ -12,7 +12,6 @@ interface Props {
 
 type SpecValue = string | number | boolean | undefined;
 
-// fix this
 const SPEC_ORDER = [
   { key: "processor", label: "Chipset", isNumeric: false },
   { key: "ram", label: "RAM", isNumeric: true, unit: "GB" },
@@ -23,13 +22,13 @@ const SPEC_ORDER = [
   { key: "refreshRate", label: "Refresh Rate", isNumeric: true, unit: "Hz" },
 ];
 
-// Helper to extract numbers from strings (e.g. "12GB" -> 12)
+// Helper to extract numbers from strings
 const extractNumber = (val: SpecValue): number => {
   if (val === undefined || val === null) return 0;
   if (typeof val === "boolean") return val ? 1 : 0; // Handle boolean if erroneously marked numeric
   if (typeof val === "number") return val;
-  // Safe string regex match
-  const match = String(val).match(/(\d+)/);
+
+  const match = String(val).match(/(\d+)/); // Safe string regex match
   return match ? parseInt(match[0], 10) : 0;
 };
 
@@ -47,9 +46,8 @@ const ComparisonBar = ({
 
   const val1 = extractNumber(activeValue);
   const val2 = extractNumber(rivalValue);
-  const max = Math.max(val1, val2) || 1; // Avoid divide by zero
+  const max = Math.max(val1, val2) || 1;
 
-  // Calculate percentages
   const pct1 = Math.round((val1 / max) * 100);
   const pct2 = Math.round((val2 / max) * 100);
 

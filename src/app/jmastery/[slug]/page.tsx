@@ -1,7 +1,6 @@
 import { getProductBySlug } from "@/components/j-curve-mastery/data";
 import GalleryProducts from "@/components/j-curve-mastery/GalleryProducts";
 import ProductsInfo from "@/components/j-curve-mastery/ProductsInfo";
-import { getProductDetails } from "@/lib/imagekit-loader";
 import { notFound } from "next/navigation";
 
 interface Props {

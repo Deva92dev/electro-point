@@ -28,13 +28,12 @@ const GeneralHero = () => {
             Collection
           </span>
         </h1>
-
         <p className="text-lg md:text-xl text-zinc-300 max-w-2xl mx-auto leading-relaxed animate-in fade-in slide-in-from-left-8 duration-700 delay-200">
           Explore our curated selection of premium electronics. Performance,
           design, and innovation in every pixel.
         </p>
       </div>
-      {/* 3. SCROLL INDICATOR (Optional) */}
+      {/* SCROLL INDICATOR  */}
       <div className="absolute bottom-8 left-1/2 -translate-x-1/2 animate-bounce text-white/50 mt-4">
         <ArrowDown className="w-6 h-6" />
       </div>
