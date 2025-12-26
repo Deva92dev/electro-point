@@ -52,13 +52,13 @@ const MarqueeItem = ({ item }: { item: (typeof CATEGORIES)[0] }) => {
 
 const Marquee = () => {
   return (
-    <div className="w-full py-12 overflow-hidden bg-background/80 border-y border-border relative z-10">
-      {/* Gradient Masks using semantic 'background' color */}
+    <div className="w-full py-8 overflow-hidden bg-background/80 border-y border-border relative z-10">
+      {/* Gradient Masks */}
       <div className="absolute top-0 left-0 w-32 h-full bg-linear-to-r from-background to-transparent z-20 pointer-events-none" />
       <div className="absolute top-0 right-0 w-32 h-full bg-linear-to-l from-background to-transparent z-20 pointer-events-none" />
 
-      {/* Row 1: Scrolling Left */}
-      <div className="flex mb-8 w-max min-w-full pause-on-hover">
+      {/*  Scrolling Left */}
+      <div className="flex mb-6 w-max min-w-full pause-on-hover">
         <div className="flex animate-scroll-left">
           {CATEGORIES.map((item, idx) => (
             <MarqueeItem key={`a-${idx}`} item={item} />
@@ -69,7 +69,7 @@ const Marquee = () => {
         </div>
       </div>
 
-      {/* Row 2: Scrolling Right (Reversed Data) */}
+      {/* Scrolling Right (Reversed Data) */}
       <div className="flex w-max min-w-full pause-on-hover">
         <div className="flex animate-scroll-right">
           {[...CATEGORIES].reverse().map((item, idx) => (

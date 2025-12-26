@@ -431,6 +431,7 @@ export const getCategoryChampion = async (inputSlug: string) => {
       id: true,
       name: true,
       basePrice: true,
+      productType: true,
     },
   });
 
@@ -446,6 +447,7 @@ export const getCategoryChampion = async (inputSlug: string) => {
     productName: championProduct?.name,
     price: championProduct?.basePrice,
     titanImage: heroImageUrl,
+    productType: championProduct?.productType,
   };
 };
 

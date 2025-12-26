@@ -6,14 +6,7 @@ import { useTheme } from "next-themes";
 import { useMemo } from "react";
 import CheckoutForm from "./CheckoutForm";
 
-// DEBUG: Check if the key exists
 const key = process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY;
-console.log(
-  "Stripe Key Loaded:",
-  key
-    ? "YES (Starts with " + key.substring(0, 5) + ")"
-    : "NO - KEY IS UNDEFINED"
-);
 
 if (!key) {
   throw new Error("Stripe Key is missing in .env");

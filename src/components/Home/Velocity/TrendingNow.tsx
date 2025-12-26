@@ -17,7 +17,7 @@ const TrendingNow = async () => {
   };
 
   return (
-    <section className="py-12 lg:py-24 w-full px-4 bg-background text-foreground">
+    <section className="pt-12 pb-24 lg:pt-16 lg:pb-32 w-full px-4 bg-background text-foreground">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="flex items-end justify-between mb-8 lg:mb-12">
@@ -33,7 +33,7 @@ const TrendingNow = async () => {
             variant="ghost"
             className="hidden md:flex gap-2 text-primary hover:text-primary-foreground hover:bg-primary"
           >
-            View All Products <ArrowRight className="w-4 h-4" />
+            <Link href="/products">View All Products</Link>
           </Button>
         </div>
 

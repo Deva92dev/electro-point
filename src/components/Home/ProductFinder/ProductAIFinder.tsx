@@ -7,6 +7,7 @@ import { Category, FilteredProductsType } from "@/utils/types";
 import ProductFinderModal from "./ProductFinderModal";
 import { getFilteredProducts } from "@/utils/actions/mutations";
 import { formatPrice } from "@/utils/util";
+import { ArrowRight, Search, Sparkles, Loader2 } from "lucide-react";
 
 interface Props {
   categories: Category[];
@@ -21,7 +22,7 @@ const ProductAIFinder = ({ categories }: Props) => {
   const [selectedType, setSelectedType] = useState<
     Category["productType"] | null
   >(null);
-  const [maxBudget, setMaxBudget] = useState<number>(5000);
+  const [maxBudget, setMaxBudget] = useState<number>(2000);
   const [priority, setPriority] = useState<string | null>(null);
 
   const [isPending, startTransition] = useTransition();
@@ -59,92 +60,94 @@ const ProductAIFinder = ({ categories }: Props) => {
 
   return (
     <>
-      <section
-        className="relative flex flex-col w-full max-w-none lg:max-w-md overflow-hidden rounded-4xl shadow-2xl border bg-zinc-900 border-black/10 mask-box"
-        style={{
-          // the glassmorphism + noise texture effect
-          background: `
-            linear-gradient(to bottom right, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.01)),
-            url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.05'/%3E%3C/svg%3E")
-          `,
-          backdropFilter: "blur(20px)",
-        }}
-      >
+      <section className="relative flex flex-col w-full h-full min-h-[500px] overflow-hidden rounded-3xl shadow-2xl border border-white/10 bg-zinc-950">
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,#2a2a2a_0%,#000000_100%)] z-0" />
+        <div className="absolute top-0 right-0 w-[300px] h-[300px] bg-primary/20 blur-[120px] rounded-full z-0 opacity-40 pointer-events-none" />
+
         {/* Content Container */}
-        <div className="p-6 md:p-8 lg:p-10 relative z-10">
-          {/* Progress Dots */}
-          <div className="flex justify-center mb-8 gap-3">
-            {[...Array(QUIZ_STEPS)].map((_, i) => (
-              <div
-                key={i}
-                className={`h-1.5 rounded-full transition-all duration-500 ${
-                  step === i + 1 ? "w-8 bg-primary" : "w-2 bg-white/20"
-                }`}
-              />
-            ))}
+        <div className="p-8 md:p-10 flex flex-col h-full relative z-10">
+          {/* Header */}
+          <div className="mb-8">
+            <div className="flex items-center gap-2 mb-2">
+              <Sparkles className="w-5 h-5 text-primary animate-pulse" />
+              <span className="text-xs font-bold tracking-[0.2em] text-primary uppercase">
+                AI Assistant
+              </span>
+            </div>
+            <h2 className="text-3xl md:text-4xl font-black text-white tracking-tight leading-tight">
+              What are you <br /> looking for?
+            </h2>
           </div>
 
-          {/* Step Content */}
-          <div className="min-h-[300px] flex flex-col">
+          {/* Progress Bar */}
+          <div className="w-full h-1 bg-white/10 rounded-full mb-8 overflow-hidden">
+            <div
+              className="h-full bg-primary transition-all duration-500 ease-out"
+              style={{ width: `${(step / QUIZ_STEPS) * 100}%` }}
+            />
+          </div>
+
+          {/* Step Content Area - Grows to fill space */}
+          <div className="flex-1 flex flex-col justify-center">
             {step === 1 && (
-              <div className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-500">
-                <h2 className="text-2xl md:text-3xl font-bold tracking-tight text-center text-foreground/90">
-                  What are you looking for?
-                </h2>
+              <div className="space-y-4 animate-in fade-in slide-in-from-right-4 duration-500">
+                <p className="text-zinc-400 text-sm font-medium uppercase tracking-wider mb-2">
+                  Select Category
+                </p>
                 <div className="grid grid-cols-2 gap-3">
                   {categories.map((cat) => (
-                    <Button
+                    <button
                       key={cat.id}
                       onClick={() => setSelectedType(cat.productType)}
-                      variant="outline"
-                      className={`h-auto py-4 flex flex-col gap-2 border transition-all duration-200 ${
+                      className={`group relative p-4 rounded-xl border text-left transition-all duration-300 ${
                         selectedType === cat.productType
-                          ? "border-primary bg-primary/10 text-primary shadow-[0_0_15px_rgba(var(--primary),0.2)]"
-                          : "border-gray-700/5 bg-white/5 hover:bg-white/10 hover:border-gray-700/20 text-muted-foreground hover:text-foreground"
+                          ? "border-primary bg-primary/10 shadow-[0_0_20px_rgba(var(--primary),0.2)]"
+                          : "border-white/10 bg-white/5 hover:bg-white/10 hover:border-white/20"
                       }`}
                     >
-                      <span className="capitalize text-base font-medium">
-                        {`${cat.productType}s`}
+                      <span
+                        className={`block text-sm font-bold capitalize ${
+                          selectedType === cat.productType
+                            ? "text-primary"
+                            : "text-zinc-300 group-hover:text-white"
+                        }`}
+                      >
+                        {cat.productType}s
                       </span>
-                    </Button>
+                    </button>
                   ))}
                 </div>
               </div>
             )}
 
             {step === 2 && (
-              <div className="space-y-8 animate-in fade-in slide-in-from-right-4 duration-500">
-                <h2 className="text-2xl md:text-3xl font-bold tracking-tight text-center text-foreground/90">
-                  What is your budget?
-                </h2>
-                <div className="px-4 pt-8 space-y-8">
+              <div className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-500">
+                <p className="text-zinc-400 text-sm font-medium uppercase tracking-wider">
+                  Set Your Budget
+                </p>
+
+                <div className="px-2 pt-4">
+                  <div className="flex justify-between items-end mb-4">
+                    <span className="text-4xl font-bold text-white tracking-tighter">
+                      {formatPrice(maxBudget)}
+                    </span>
+                    <span className="text-xs text-zinc-500 mb-2">
+                      Max Limit
+                    </span>
+                  </div>
+
                   <Input
                     type="range"
                     min={MIN_BUDGET}
                     max={MAX_BUDGET}
-                    step={20}
+                    step={50}
                     value={maxBudget}
                     onChange={(e) => setMaxBudget(Number(e.target.value))}
                     className="w-full h-2 bg-white/10 rounded-lg appearance-none cursor-pointer accent-primary"
                   />
-                  <div className="flex justify-between items-center p-4 rounded-xl bg-white/5 border border-white/5">
-                    <div className="flex flex-col">
-                      <span className="text-xs text-muted-foreground uppercase tracking-wider">
-                        Min
-                      </span>
-                      <span className="font-mono">
-                        {formatPrice(MIN_BUDGET)}
-                      </span>
-                    </div>
-                    <div className="w-px h-8 bg-white/10" />
-                    <div className="flex flex-col text-right">
-                      <span className="text-xs text-primary uppercase tracking-wider">
-                        Max
-                      </span>
-                      <span className="font-mono text-xl text-primary font-bold">
-                        {formatPrice(maxBudget)}
-                      </span>
-                    </div>
+                  <div className="flex justify-between mt-2 text-xs text-zinc-500 font-mono">
+                    <span>{formatPrice(MIN_BUDGET)}</span>
+                    <span>{formatPrice(MAX_BUDGET)}</span>
                   </div>
                 </div>
               </div>
@@ -152,10 +155,10 @@ const ProductAIFinder = ({ categories }: Props) => {
 
             {step === 3 && (
               <div className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-500">
-                <h2 className="text-2xl md:text-3xl font-bold tracking-tight text-center text-foreground/90">
-                  Top Priority?
-                </h2>
-                <div className="flex flex-wrap justify-center gap-3">
+                <p className="text-zinc-400 text-sm font-medium uppercase tracking-wider">
+                  Top Priority
+                </p>
+                <div className="flex flex-wrap gap-3">
                   {[
                     "Performance",
                     "Battery Life",
@@ -163,30 +166,30 @@ const ProductAIFinder = ({ categories }: Props) => {
                     "Camera",
                     "Gaming",
                   ].map((p) => (
-                    <Button
+                    <button
                       key={p}
                       onClick={() => setPriority(p)}
-                      variant="outline"
-                      className={`rounded-full px-6 py-2 border transition-all duration-200 ${
+                      className={`px-5 py-2.5 rounded-full border text-sm font-medium transition-all duration-300 ${
                         priority === p
-                          ? "border-primary bg-primary text-primary-foreground shadow-lg scale-105"
-                          : "border-white/10 bg-white/5 hover:bg-white/10 text-muted-foreground hover:text-foreground"
+                          ? "border-primary bg-primary text-white shadow-lg scale-105"
+                          : "border-white/10 bg-white/5 text-zinc-400 hover:text-white hover:bg-white/10"
                       }`}
                     >
                       {p}
-                    </Button>
+                    </button>
                   ))}
                 </div>
               </div>
             )}
           </div>
+
           {/* Controls */}
-          <div className="flex justify-between mt-8 pt-6 border-t border-white/10">
+          <div className="flex justify-between items-center mt-8 pt-6 border-t border-white/10">
             <Button
               onClick={prevQuiz}
               disabled={step === 1 || isPending}
               variant="ghost"
-              className="text-muted-foreground hover:text-foreground hover:bg-white/5"
+              className="text-zinc-400 hover:text-white hover:bg-white/5 pl-0 transition-colors"
             >
               Back
             </Button>
@@ -197,23 +200,31 @@ const ProductAIFinder = ({ categories }: Props) => {
                 disabled={
                   (step === 1 && !selectedType) || (step === 3 && !priority)
                 }
-                className="px-8 font-semibold shadow-lg shadow-primary/20"
+                className="rounded-full px-6 bg-white text-black hover:bg-zinc-200 font-bold transition-transform active:scale-95"
               >
-                Next Step
+                Next Step <ArrowRight className="w-4 h-4 ml-2" />
               </Button>
             ) : (
               <Button
                 onClick={handleShowMatches}
                 disabled={isPending || !priority}
-                className="px-8 font-bold bg-primary hover:bg-primary/90 transition-all shadow-[0_0_20px_rgba(var(--primary),0.4)] hover:shadow-[0_0_30px_rgba(var(--primary),0.6)]"
+                className="rounded-full px-8 bg-primary hover:bg-primary/90 text-white font-bold shadow-[0_0_20px_rgba(var(--primary),0.5)] transition-all hover:scale-105 disabled:opacity-70 disabled:scale-100"
               >
-                {isPending ? "Searching..." : "Find Matches"}
+                {isPending ? (
+                  <>
+                    Analyzing <Loader2 className="w-4 h-4 ml-2 animate-spin" />
+                  </>
+                ) : (
+                  <>
+                    Find Matches <Search className="w-4 h-4 ml-2" />
+                  </>
+                )}
               </Button>
             )}
           </div>
 
           {errorMessage && (
-            <p className="text-destructive text-sm text-center mt-4 animate-pulse">
+            <p className="text-red-400 text-xs text-center mt-4 bg-red-500/10 py-2 rounded-lg border border-red-500/20">
               {errorMessage}
             </p>
           )}

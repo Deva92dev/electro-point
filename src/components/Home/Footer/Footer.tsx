@@ -63,6 +63,7 @@ const Footer = () => {
                   key={i}
                   href="#"
                   className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center hover:bg-primary hover:text-white transition-all duration-300 hover:-translate-y-1"
+                  aria-label="links for various social media sites"
                 >
                   <Icon className="w-5 h-5" />
                 </a>
@@ -125,7 +126,10 @@ const Footer = () => {
                 type="submit"
                 className="absolute top-1 right-1 h-10 w-10 rounded-full bg-primary flex items-center justify-center text-white hover:bg-primary/90 hover:scale-105 transition-all duration-300 shadow-lg"
               >
-                <Send className="w-4 h-4" />
+                <Send
+                  className="w-4 h-4"
+                  aria-label="send button for newsletter"
+                />
               </button>
             </form>
           </div>

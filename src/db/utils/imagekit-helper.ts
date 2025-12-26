@@ -109,8 +109,6 @@ export async function getAllLaptopImages() {
   const results: any = {};
 
   for (const folder of laptopFolders) {
-    console.log(`\n📁 Fetching images from: ${folder}`);
-
     const result = await getImagesFromFolder(folder);
 
     if (result.success) {
@@ -120,11 +118,7 @@ export async function getAllLaptopImages() {
         products: Object.keys(grouped).length,
         grouped: grouped,
       };
-
-      console.log(`  ✅ Found ${result.count} images`);
-      console.log(`  📦 Grouped into ${Object.keys(grouped).length} products`);
     } else {
-      console.log(`  ❌ Error fetching images:`, result.error);
       results[folder] = {
         error: result.error,
       };

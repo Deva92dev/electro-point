@@ -76,7 +76,7 @@ const RelatedProducts = async ({ currentProduct }: Props) => {
                   <h3 className="font-bold truncate">{prod.name}</h3>
                   <div className="flex justify-between items-center mt-2">
                     <span className="text-sm text-muted-foreground">
-                      ₹{parseFloat(prod.basePrice).toLocaleString()}
+                      {formatPrice(parseFloat(prod.basePrice))}
                     </span>
                     <Button
                       size="icon"

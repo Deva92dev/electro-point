@@ -33,11 +33,6 @@ export async function POST(req: Request) {
       });
 
       if (!order) {
-        console.error(
-          "❌ CRITICAL: Order not found in DB for Intent:",
-          session.id
-        );
-        // We return 200 to stop Stripe from retrying if the order is missing
         return new NextResponse("Order not found", { status: 200 });
       }
 
@@ -54,7 +49,6 @@ export async function POST(req: Request) {
         await db.delete(cart).where(eq(cart.userId, order.userId));
       }
     } catch (err: any) {
-      console.error("❌ DB UPDATE FAILED:", err.message);
       return new NextResponse(`DB Error: ${err.message}`, { status: 500 });
     }
   }
@@ -64,8 +58,6 @@ export async function POST(req: Request) {
     event.type === "payment_intent.payment_failed" ||
     event.type === "payment_intent.canceled"
   ) {
-    console.log("❌ Payment Failed/Cancelled:", session.id);
-
     const order = await db.query.orders.findFirst({
       where: eq(orders.stripePaymentIntentId, session.id),
       with: { items: true },

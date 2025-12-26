@@ -1,6 +1,6 @@
 "use client";
 
-import { X } from "lucide-react";
+import { X, Sparkles, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { FilteredProductsType } from "@/utils/types";
 import Link from "next/link";
@@ -30,14 +30,12 @@ const ProductFinderModal = ({
 
   useEffect(() => {
     setMounted(true);
-
-    // Optional: Lock body scroll when modal is open
+    // locks bg scrolling
     if (isOpen) {
       document.body.style.overflow = "hidden";
     } else {
       document.body.style.overflow = "unset";
     }
-
     return () => {
       document.body.style.overflow = "unset";
     };
@@ -46,43 +44,86 @@ const ProductFinderModal = ({
   if (!isOpen || !mounted) return null;
 
   const modalContent = (
-    <div className="fixed inset-0 z-100 flex flex-col bg-background/95 backdrop-blur-md animate-in fade-in duration-300">
-      {/* header */}
-      <div className="flex items-center justify-between p-6 border-b border-border/40 shrink-0">
+    <div className="fixed inset-0 z-100 flex flex-col animate-in fade-in duration-300">
+      <div
+        className="absolute inset-0 bg-zinc-950/90 backdrop-blur-xl z-0"
+        style={{
+          backgroundImage: `
+              radial-gradient(circle at top right, #2a2a2a 0%, #09090b 100%),
+              url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.05'/%3E%3C/svg%3E")
+            `,
+          backgroundBlendMode: "overlay",
+        }}
+      />
+
+      {/* Header */}
+      <div className="relative z-10 flex items-center justify-between p-6 md:p-8 border-b border-white/10 shrink-0">
         <div>
-          <h2 className="text-2xl font-bold">Your Perfect Match</h2>
-          <p className="text-muted-foreground text-sm">
-            Based on {priority} • Under{" "}
-            {formatPrice(maxBudget.toLocaleString())}
+          <div className="flex items-center gap-2 mb-1">
+            <Sparkles className="w-4 h-4 text-primary animate-pulse" />
+            <span className="text-xs font-bold tracking-widest text-primary uppercase">
+              AI Recommendation
+            </span>
+          </div>
+          <h2 className="text-2xl md:text-3xl font-bold text-white tracking-tight">
+            Your Perfect Match
+          </h2>
+          <p className="text-zinc-400 text-sm mt-1">
+            Optimized for{" "}
+            <span className="text-white font-medium">{priority}</span> • Budget
+            under{" "}
+            <span className="text-white font-medium">
+              {formatPrice(maxBudget)}
+            </span>
           </p>
         </div>
         <Button
           variant="ghost"
           size="icon"
           onClick={onClose}
-          className="rounded-full h-12 w-12 hover:bg-primary/10"
+          className="rounded-full h-12 w-12 hover:bg-white/10 text-white transition-colors"
         >
           <X className="w-6 h-6" />
         </Button>
       </div>
 
+      {/* Content */}
       <div
-        className="flex-1 overflow-y-auto p-6 overscroll-y-contain"
+        className="relative z-10 flex-1 overflow-y-auto p-6 md:p-8 overscroll-y-contain"
         data-lenis-prevent
       >
-        <div className="max-w-5xl mx-auto pb-20">
+        <div className="max-w-6xl mx-auto pb-20">
           {isLoading ? (
-            <div className="flex flex-col justify-center items-center h-[60vh] space-y-4">
-              <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin" />
-              <p className="text-xl animate-pulse">Analyzing Products...</p>
+            <div className="flex flex-col justify-center items-center h-[50vh] space-y-6">
+              <div className="relative">
+                <div className="w-16 h-16 border-4 border-primary/30 border-t-primary rounded-full animate-spin" />
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <Sparkles className="w-6 h-6 text-primary animate-pulse" />
+                </div>
+              </div>
+              <div className="text-center space-y-2">
+                <p className="text-xl font-medium text-white">
+                  Analyzing Specifications...
+                </p>
+                <p className="text-sm text-zinc-500">
+                  Scanning thousands of products for the best {priority} match.
+                </p>
+              </div>
             </div>
           ) : results.length === 0 ? (
-            <div className="flex flex-col justify-center items-center h-[60vh] space-y-4 text-center">
-              <p className="font-medium text-xl">No Matches Found...</p>
-              <p className="text-muted-foreground">
-                Try increasing your budget or change your priority
+            <div className="flex flex-col justify-center items-center h-[50vh] space-y-4 text-center">
+              <p className="font-medium text-xl text-white">
+                No exact matches found.
               </p>
-              <Button onClick={onClose} variant="outline">
+              <p className="text-zinc-400 max-w-md">
+                Your criteria might be too strict. Try increasing your budget or
+                changing your priority.
+              </p>
+              <Button
+                onClick={onClose}
+                variant="outline"
+                className="mt-4 border-white/20 text-white hover:bg-white/10"
+              >
                 Adjust Filters
               </Button>
             </div>
@@ -92,39 +133,56 @@ const ProductFinderModal = ({
                 <Link
                   key={prod.id}
                   href={`/products/${prod.id}`}
-                  className="group"
-                  onClick={onClose} // Close modal when clicking a product
+                  className="group block h-full"
+                  onClick={onClose}
                 >
-                  <div className="bg-card border border-border rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 hover:-translate-y-1 h-full flex flex-col">
-                    <div className="relative w-full h-64 overflow-hidden bg-muted">
+                  <div className="bg-zinc-900/50 border border-white/10 rounded-2xl overflow-hidden shadow-lg hover:shadow-primary/20 hover:border-primary/50 transition-all duration-300 hover:-translate-y-1 h-full flex flex-col backdrop-blur-sm">
+                    {/* Image Area */}
+                    <div className="relative w-full aspect-4/3 overflow-hidden bg-white/5">
                       <Image
                         src={prod.mainImagePath || "/placeholder.jpg"}
                         alt={prod.name}
                         fill
                         loading="lazy"
-                        className="object-cover group-hover:scale-105 transition-transform duration-500"
+                        className="object-contain p-6 group-hover:scale-110 transition-transform duration-500"
                         unoptimized
                       />
-                      <div className="absolute top-3 right-3 bg-black/60 backdrop-blur-sm text-white text-xs px-3 py-1 rounded-full">
-                        Match: {Math.floor(Math.random() * 15) + 85}%
+                      {/* AI Match Badge */}
+                      <div className="absolute top-3 right-3 bg-primary/90 backdrop-blur-md text-white text-[10px] font-bold px-3 py-1 rounded-full shadow-lg border border-white/20">
+                        {Math.floor(Math.random() * 10) + 90}% MATCH
                       </div>
                     </div>
 
+                    {/* Details */}
                     <div className="p-5 flex flex-col flex-1">
-                      <h3 className="text-xl font-bold mb-2 line-clamp-2 group-hover:text-primary transition-colors">
+                      <h3 className="text-lg font-bold text-white mb-1 line-clamp-1 group-hover:text-primary transition-colors">
                         {prod.name}
                       </h3>
-                      <p className="text-lg font-semibold text-primary mb-4">
-                        {formatPrice(parseFloat(prod.basePrice))}
-                      </p>
 
-                      <div className="mt-auto space-y-3">
-                        <p className="text-sm text-muted-foreground line-clamp-2">
-                          {prod.quickSpecs
-                            ? Object.values(prod.quickSpecs).join(" • ")
-                            : "View details for specs"}
-                        </p>
-                        <Button className="w-full gap-2 group-hover:bg-primary/90">
+                      <div className="flex items-center gap-2 mb-4">
+                        <span className="text-xl font-bold text-primary">
+                          {formatPrice(parseFloat(prod.basePrice))}
+                        </span>
+                        {/* Optional: Add rating stars here if available */}
+                      </div>
+
+                      <div className="mt-auto space-y-4">
+                        {/* Specs Mini-Grid */}
+                        <div className="grid grid-cols-2 gap-2 text-xs text-zinc-400">
+                          {prod.quickSpecs &&
+                            Object.entries(prod.quickSpecs)
+                              .slice(0, 4)
+                              .map(([key, val]) => (
+                                <div
+                                  key={key}
+                                  className="bg-white/5 px-2 py-1.5 rounded border border-white/5 truncate"
+                                >
+                                  {String(val)}
+                                </div>
+                              ))}
+                        </div>
+
+                        <Button className="w-full bg-white text-black hover:bg-zinc-200 font-bold rounded-full">
                           View Details
                         </Button>
                       </div>
@@ -139,8 +197,6 @@ const ProductFinderModal = ({
     </div>
   );
 
-  // This teleports the 'modalContent' to be a direct child of <body>
-  // bypassing all parent z-indexes (like the Navbar or Hero Section).
   return createPortal(modalContent, document.body);
 };
 

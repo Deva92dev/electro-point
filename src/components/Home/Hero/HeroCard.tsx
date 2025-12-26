@@ -28,7 +28,7 @@ const HeroCard = ({
           unoptimized //imagekit already optimizing
         />
         <div className="absolute inset-0 bg-linear-to-t from-black/90 via-black/20 to-transparent opacity-60 transition-opacity duration-500 group-hover:opacity-80" />
-        {/* 5. CONTENT OVERLAY */}
+        {/* CONTENT OVERLAY */}
         <div className="absolute bottom-0 left-0 w-full p-8 flex flex-col  justify-end h-full">
           {/* Top Label */}
           <div className="mb-auto opacity-0 -translate-y-4 transition-all duration-500 group-hover:opacity-100 group-hover:translate-y-0">

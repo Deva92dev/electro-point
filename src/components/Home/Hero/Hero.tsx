@@ -1,23 +1,29 @@
 import HeroScrollEffect from "./HeroScrollEffect";
 import { getHeroImages } from "@/utils/actions/actions";
+import { ArrowRight } from "lucide-react";
 
-const Hero = async () => {
+const FeaturedCollections = async () => {
   const categoryResults = await getHeroImages();
 
   return (
-    <section className="w-full pt-8 pb-12 md:pt-12 md:pb-24 overflow-hidden">
-      <div className="w-full pl-4 md:pl-8 lg:pl-12">
-        <div className="flex items-end justify-between pr-4 md:pr-12 mb-8">
-          <h1 className="text-4xl md:text-6xl lg:text-7xl font-black tracking-tighter uppercase leading-[0.9]">
-            Future <br />
-            <span className="text-transparent bg-clip-text bg-linear-to-r from-primary to-purple-600">
-              Ready.
-            </span>
-          </h1>
-          <p className="hidden md:block text-muted-foreground max-w-xs text-sm font-medium text-right">
-            Explore the 2025 collection. <br />
-            Curated for the modern creator.
-          </p>
+    <section className="relative w-full pb-12 md:pb-24 overflow-hidden bg-background">
+      <div className="w-full">
+        <div className="container mx-auto px-4 md:px-8 mb-8 flex items-end justify-between">
+          <div>
+            <h2 className="text-2xl md:text-3xl font-bold tracking-tight flex items-center gap-2">
+              Curated Collections
+            </h2>
+            <p className="text-muted-foreground mt-2 text-sm md:text-base max-w-md">
+              Explore our 2025 lineup designed for the modern creator.
+            </p>
+          </div>
+
+          <div className="hidden md:flex items-center gap-2 text-sm font-medium text-muted-foreground animate-pulse">
+            <span>Scroll to explore</span>
+            <div className="w-8 h-8 rounded-full border border-border flex items-center justify-center bg-muted/50">
+              <ArrowRight className="w-4 h-4" />
+            </div>
+          </div>
         </div>
         <HeroScrollEffect results={categoryResults} />
       </div>
@@ -25,4 +31,4 @@ const Hero = async () => {
   );
 };
 
-export default Hero;
+export default FeaturedCollections;

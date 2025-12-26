@@ -4,11 +4,6 @@
 @import "./styles/tokens.css";
 @import "./styles/utilities.css";
 @import "./styles/animations.css";
-/* Optional: theme variant */
-
-/* Component-specific styles
-styles/components/{name}.css imported inside each component */
-/* import "@/app/styles/components/product-card.css"; like this */
 
 @custom-variant dark (&:is(.dark *));
 

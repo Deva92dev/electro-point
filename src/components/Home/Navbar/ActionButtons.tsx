@@ -46,13 +46,11 @@ const ActionButtons = () => {
     setMounted(true);
   }, []);
 
-  // When session exists, fetch DB state
   useEffect(() => {
     const syncCart = async () => {
       if (session?.user && !isSynced) {
         try {
           const serverItems = await getCart();
-          // If server items exist (or empty array), force update local store
           if (serverItems) {
             syncWithServer(serverItems);
           }
@@ -61,7 +59,6 @@ const ActionButtons = () => {
         }
       }
     };
-
     syncCart();
   }, [session, syncWithServer, isSynced]);
 
@@ -82,7 +79,7 @@ const ActionButtons = () => {
   };
 
   return (
-    <div className="flex items-center gap-3">
+    <div className="flex items-center gap-2 sm:gap-3">
       <Button
         variant="ghost"
         size="icon"
@@ -101,14 +98,13 @@ const ActionButtons = () => {
         )}
       </Button>
 
-      {/* Cart */}
       <Button
         variant="ghost"
         size="icon"
         onClick={toggleCart}
         className="relative text-muted-foreground hover:text-foreground cursor-pointer"
       >
-        <ShoppingCart className="w-5 h-5" />
+        <ShoppingCart className="w-5 h-5" aria-label="Shopping Cart Icon" />
         {mounted && count > 0 && (
           <span className="absolute -top-1 -right-1 w-5 h-5 bg-primary text-primary-foreground text-[10px] font-bold flex items-center justify-center rounded-full animate-in zoom-in">
             {count}
@@ -122,7 +118,7 @@ const ActionButtons = () => {
           <Loader className="w-4 h-4 animate-spin text-muted-foreground" />
         </div>
       ) : session ? (
-        // Logged in State
+        // Logged In
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button
@@ -182,8 +178,8 @@ const ActionButtons = () => {
           </DropdownMenuContent>
         </DropdownMenu>
       ) : (
-        // guest state
-        <div className="flex items-center gap-2">
+        // Guest State
+        <div className="hidden lg:flex items-center gap-2">
           <Link href="/login">
             <Button variant="ghost" className="font-semibold cursor-pointer">
               Log In

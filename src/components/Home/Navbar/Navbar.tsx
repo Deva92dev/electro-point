@@ -1,22 +1,40 @@
+import { Suspense } from "react";
+import dynamic from "next/dynamic";
 import ActionButtons from "./ActionButtons";
-import Dropdown from "./Dropdown";
 import Logo from "./Logo";
 import NavLinks from "./NavLinks";
+import {
+  ActionsSkeleton,
+  DropdownSkeleton,
+  NavLinksSkeleton,
+} from "./ActionSkeleton";
+
+const Dropdown = dynamic(() => import("./Dropdown"), {
+  loading: () => <DropdownSkeleton />,
+});
 
 const Navbar = () => {
   return (
-    <nav className="sticky top-0 z-50 h-20 border-b border-border/40 bg-background/80 backdrop-blur-md supports-backdrop-filter:bg-background/60">
+    <nav className="sticky top-0 z-50 h-20 border-b border-border/40 bg-background/80 md:backdrop-blur-md supports-backdrop-filter:bg-background/60">
       <div className="max-w-7xl mx-auto h-full px-4 flex items-center justify-between">
         <div className="shrink-0">
           <Logo />
         </div>
-        <div className="hidden md:block">
-          <NavLinks />
+
+        <div className="hidden lg:block">
+          <Suspense fallback={<NavLinksSkeleton />}>
+            <NavLinks />
+          </Suspense>
         </div>
-        <div className="hidden md:block">
-          <ActionButtons />
+
+        <div className="flex items-center gap-2 md:gap-4">
+          <Suspense fallback={<ActionsSkeleton />}>
+            <ActionButtons />
+          </Suspense>
+          <div className="lg:hidden">
+            <Dropdown />
+          </div>
         </div>
-        <Dropdown />
       </div>
     </nav>
   );

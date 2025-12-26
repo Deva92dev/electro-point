@@ -42,19 +42,15 @@ const ShippingForm = ({ onSessionCreated }: Props) => {
   const onSubmit = async (values: ShippingValues) => {
     setLoading(true);
     try {
-      // 1. Lock stock and create pending order
-      console.log("🟡 Calling createOrder action...", values);
+      // Lock stock and create pending order
       const result = await createOrder({ shippingAddress: values });
-
       if (!result?.clientSecret) {
         throw new Error("No clientSecret returned from server");
       }
-
-      // 2. Pass the secret back to parent to show Stripe
+      // Pass the secret back to parent to show Stripe
       onSessionCreated(result.clientSecret);
       toast.success("Address saved, Proceeding to Payment");
     } catch (error: any) {
-      console.error("🔴 Error:", error);
       toast.error(error.message || "Something went wrong");
     } finally {
       setLoading(false);
@@ -63,12 +59,7 @@ const ShippingForm = ({ onSessionCreated }: Props) => {
 
   return (
     <Form {...form}>
-      <form
-        onSubmit={form.handleSubmit(onSubmit, (errors) =>
-          console.log("🔴 VALIDATION FAILED:", errors)
-        )}
-        className="space-y-4"
-      >
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
         {/* ROW 1: Name & Email */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <FormField
@@ -99,7 +90,7 @@ const ShippingForm = ({ onSessionCreated }: Props) => {
           />
         </div>
 
-        {/* ROW 2: Phone & Country (ADDED THESE) */}
+        {/* ROW 2: Phone & Country */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <FormField
             control={form.control}

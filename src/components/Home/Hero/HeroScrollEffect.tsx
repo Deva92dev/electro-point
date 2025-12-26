@@ -18,26 +18,21 @@ interface Props {
 
 const HeroScrollEffect = ({ results }: Props) => {
   const carouselRef = useRef(null);
+
   const { scrollYProgress } = useScroll({
     target: carouselRef,
     axis: "y",
-    offset: ["start end", "end start"],
+    offset: ["start 70%", "end start"],
   });
-  const input = [0, 1];
-  const output = ["0%", "-40%"];
-  const x = useTransform(scrollYProgress, input, output);
+
+  const x = useTransform(scrollYProgress, [0, 1], ["0%", "-50%"]);
 
   return (
-    <section
-      ref={carouselRef}
-      className="w-full py-12 lg:py-24 overflow-x-hidden bg-background"
-    >
-      <div className="container mx-auto px-4 mb-12">
-        <h2 className="text-xl md:text-2xl font-medium tracking-tight text-muted-foreground">
-          Explore Collections
-        </h2>
-      </div>
-      <m.div className="flex gap-6 pl-4 md:pl-12 w-max" style={{ x }}>
+    <section ref={carouselRef} className="relative w-full overflow-x-hidden">
+      <m.div
+        className="flex gap-6 pl-4 md:pl-8 lg:pl-12 w-max py-4 pr-12"
+        style={{ x }}
+      >
         {results.map((item, index) => (
           <HeroCard key={item.id} item={item} index={index} />
         ))}

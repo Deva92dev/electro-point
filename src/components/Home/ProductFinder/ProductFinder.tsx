@@ -1,29 +1,29 @@
-import dynamic from "next/dynamic";
 import { getCategories } from "@/utils/actions/actions";
 import ProductAIFinder from "./ProductAIFinder";
 import { Category } from "@/utils/types";
-
-const Product3D = dynamic(() => import("./Product3D"), {
-  loading: () => (
-    <div className="w-full h-full min-h-[400px] flex items-center justify-center bg-muted/20 rounded-3xl">
-      <p className="animate-pulse text-muted-foreground">Loading 3D View...</p>
-    </div>
-  ),
-});
+import Lazy3DContainer from "./Lazy3DContainer";
 
 const ProductFinder = async () => {
   const categories: Category[] = await getCategories();
 
   return (
-    <section
-      className="flex flex-col lg:flex-row w-full h-auto lg:h-[800px] py-12 lg:py-24      
-        gap-12 lg:gap-0 relative z-10 overflow-hidden"
-    >
-      <div className="w-full lg:w-[40vw] px-4 md:px-8 lg:px-4 flex items-center justify-center bg-inherit z-20">
-        <ProductAIFinder categories={categories} />
-      </div>
-      <div className="relative w-full lg:w-[60vw] h-[500px] lg:h-full flex items-center justify-center px-4 z-10">
-        <Product3D />
+    <section className="w-full pt-16 lg:pt-32 pb-8 lg:pb-12 bg-background relative overflow-hidden">
+      <div className="container mx-auto px-4 md:px-8">
+        <div className="mb-12 text-center lg:text-left">
+          <h2 className="text-3xl md:text-5xl font-black tracking-tighter mb-4">
+            Discovery Engine
+          </h2>
+        </div>
+        <div className="grid lg:grid-cols-12 gap-6 lg:gap-8 items-stretch">
+          {/* LEFT: AI Finder */}
+          <div className="lg:col-span-5 h-[600px] lg:h-[650px]">
+            <ProductAIFinder categories={categories} />
+          </div>
+          {/* RIGHT: 3D Showcase */}
+          <div className="lg:col-span-7 h-[600px] lg:h-[650px]">
+            <Lazy3DContainer />
+          </div>
+        </div>
       </div>
     </section>
   );
