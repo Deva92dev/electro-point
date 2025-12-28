@@ -1,18 +1,48 @@
-/* Use this only for small, reusable utility classes, not full components. */
-
 @layer utilities {
-  .bg-brand-gradient {
-    background-image: var(--brand-gradient);
+  .animate-skew-wiggle {
+    animation: skew-wiggle 20s infinite;
+    backface-visibility: hidden;
+    transform: translateZ(0);
+    will-change: transform;
   }
 
-  .text-gradient {
-    background-image: var(--brand-gradient);
-    -webkit-background-clip: text;
-    background-clip: text;
-    color: transparent;
+  .animate-scroll-left {
+    animation: scroll-left 40s linear infinite;
+    will-change: transform; /* Hint to browser to optimize this layer */
   }
 
-  .mask-box {
-    mask: radial-gradient(40px at 40px 40px, #0000 98%, #000) -40px -40px;
+  .animate-scroll-right {
+    animation: scroll-right 40s linear infinite;
+    will-change: transform;
+  }
+}
+
+@keyframes scroll-left {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+@keyframes scroll-right {
+  from {
+    transform: translateX(-50%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+@keyframes skew-wiggle {
+  0% {
+    transform: skew(0deg);
+  }
+  50% {
+    transform: skew(12deg);
+  } /* Reduced from 25deg to save Mobile GPU */
+  100% {
+    transform: skew(0deg);
   }
 }

@@ -63,7 +63,13 @@ const PureHero = () => {
                 </span>
               </h1>
 
-              <p className="mx-auto lg:mx-0 max-w-none sm:max-w-[550px] xl:max-w-[700px] text-lg md:text-2xl leading-relaxed text-[#64748b] dark:text-[#94a3b8] md:text-balance font-medium">
+              <p
+                className="mx-auto lg:mx-0 max-w-none sm:max-w-[550px] xl:max-w-[700px] text-lg md:text-2xl leading-relaxed text-[#64748b] dark:text-[#94a3b8] md:text-balance font-medium"
+                style={{
+                  contentVisibility: "auto",
+                  containIntrinsicSize: "0 50px",
+                }}
+              >
                 Discover the latest laptops, smartphones, and gadgets designed
                 to elevate your productivity. Two-day delivery on all premium
                 items.

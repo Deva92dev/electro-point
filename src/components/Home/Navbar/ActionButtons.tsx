@@ -16,7 +16,6 @@ import { getCart } from "@/utils/actions/mutations";
 import {
   Box,
   HeartIcon,
-  Loader,
   LogIn,
   LogOut,
   Moon,
@@ -83,6 +82,7 @@ const ActionButtons = () => {
         onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
         className="text-muted-foreground hover:text-foreground relative w-10 h-10"
         suppressHydrationWarning
+        aria-label="Toggle color theme"
       >
         <Sun className="h-[1.2rem] w-[1.2rem] rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
         <Moon className="absolute h-[1.2rem] w-[1.2rem] rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
@@ -95,11 +95,13 @@ const ActionButtons = () => {
         size="icon"
         onClick={toggleCart}
         className="relative text-muted-foreground hover:text-foreground cursor-pointer w-10 h-10"
+        aria-label="Open shopping cart"
       >
-        <ShoppingCart className="w-5 h-5" />
+        <ShoppingCart className="w-5 h-5" aria-hidden="true" />
         {mounted && count > 0 && (
           <span className="absolute -top-1 -right-1 w-5 h-5 bg-primary text-primary-foreground text-[10px] font-bold flex items-center justify-center rounded-full animate-in zoom-in">
             {count}
+            <span className="sr-only">items in cart</span>
           </span>
         )}
       </Button>
@@ -110,6 +112,7 @@ const ActionButtons = () => {
             variant="ghost"
             size="icon"
             className="relative rounded-full w-10 h-10 ring-2 ring-transparent hover:ring-primary/20 transition-all"
+            aria-label={session ? "User account menu" : "Guest account menu"}
           >
             {session?.user?.image ? (
               <Avatar className="w-8 h-8">
@@ -120,7 +123,10 @@ const ActionButtons = () => {
               </Avatar>
             ) : (
               // Generic Icon for Guests / Loading
-              <User className="w-5 h-5 text-muted-foreground" />
+              <User
+                className="w-5 h-5 text-muted-foreground"
+                aria-hidden="true"
+              />
             )}
           </Button>
         </DropdownMenuTrigger>

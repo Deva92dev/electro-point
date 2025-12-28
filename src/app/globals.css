@@ -1,9 +1,9 @@
 @import "tailwindcss";
-
 @plugin "tailwindcss-animate";
+
 @import "./styles/tokens.css";
-@import "./styles/utilities.css";
 @import "./styles/animations.css";
+@import "./styles/utilities.css";
 
 @custom-variant dark (&:is(.dark *));
 
@@ -16,7 +16,10 @@
     font-family: var(--font-sans);
     font-size: var(--fs-base);
     line-height: var(--lh-base);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
+
   h1 {
     @apply text-(length:--fs-4xl) leading-(--lh-hero) font-extrabold tracking-tight;
   }
@@ -29,6 +32,7 @@
   h4 {
     @apply text-(length:--fs-xl) leading-(--lh-base) font-semibold;
   }
+
   small,
   .text-sm {
     @apply text-(length:--fs-sm) leading-(--lh-tight);
