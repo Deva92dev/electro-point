@@ -13,7 +13,7 @@ const PureHero = () => {
       </div>
 
       <div className="container px-4 md:px-8 mx-auto relative">
-        {/* Dotted Line */}
+        {/* SVG Decoration */}
         <svg
           className="absolute hidden lg:block z-0 pointer-events-none"
           width="300"
@@ -41,7 +41,7 @@ const PureHero = () => {
           {/* Text Content */}
           <div className="flex flex-col space-y-6 md:space-y-8 text-center lg:text-left">
             <div className="space-y-4">
-              <h1 className="text-4xl sm:text-5xl font-extrabold tracking-tight lg:text-6xl xl:text-8xl relative z-20 text-[#111111] dark:text-[#f8fafc] md:text-balance">
+              <h1 className="text-4xl sm:text-5xl font-extrabold tracking-tight lg:text-6xl xl:text-8xl relative z-20 text-[#111111] dark:text-[#f8fafc]">
                 Smart Tech <br />
                 <span className="relative inline-block text-[#4338ca] dark:text-[#818cf8] mt-2">
                   For Smarter <br />
@@ -63,13 +63,7 @@ const PureHero = () => {
                 </span>
               </h1>
 
-              <p
-                className="mx-auto lg:mx-0 max-w-none sm:max-w-[550px] xl:max-w-[700px] text-lg md:text-2xl leading-relaxed text-[#64748b] dark:text-[#94a3b8] md:text-balance font-medium"
-                style={{
-                  contentVisibility: "auto",
-                  containIntrinsicSize: "0 50px",
-                }}
-              >
+              <p className="mx-auto lg:mx-0 max-w-none sm:max-w-[550px] xl:max-w-[700px] text-lg md:text-2xl leading-relaxed text-[#64748b] dark:text-[#94a3b8] font-medium">
                 Discover the latest laptops, smartphones, and gadgets designed
                 to elevate your productivity. Two-day delivery on all premium
                 items.
