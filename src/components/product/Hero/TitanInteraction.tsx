@@ -73,7 +73,7 @@ const TitanInteraction = ({ src, alt }: Props) => {
           alt={alt}
           fill
           className="object-contain drop-shadow-2xl"
-          priority
+          preload={true}
           sizes="(max-width:768px) 100vw, 100vw"
           unoptimized
         />

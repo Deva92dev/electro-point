@@ -25,7 +25,10 @@ const SortDropDown = ({ activeSort }: { activeSort?: string }) => {
         Sort by:
       </span>
       <Select defaultValue={activeSort || "newest"} onValueChange={handleSort}>
-        <SelectTrigger className="w-[180px] h-10 bg-background">
+        <SelectTrigger
+          className="w-[180px] h-10 bg-background"
+          aria-label="Sort products"
+        >
           <SelectValue placeholder="Newest Arrival" />
         </SelectTrigger>
         <SelectContent>

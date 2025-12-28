@@ -61,17 +61,17 @@ const ComparisonBar = ({
   const pct2 = Math.round((val2 / max) * 100);
 
   return (
-    <div className="flex flex-col gap-1 mt-2 w-full">
-      <div className="flex items-center gap-2">
-        <div className="h-1.5 flex-1 bg-white/10 rounded-full overflow-hidden">
+    <div className="flex flex-col gap-1.5 mt-3 w-full">
+      <div className="flex items-center gap-3">
+        <div className="h-2 flex-1 bg-white/10 rounded-full overflow-hidden">
           <div
-            className="h-full bg-indigo-500 transition-all duration-1000 ease-out"
+            className="h-full bg-indigo-400 transition-all duration-1000 ease-out"
             style={{ width: `${pct1}%` }}
           />
         </div>
       </div>
-      <div className="flex items-center gap-2">
-        <div className="h-1.5 flex-1 bg-white/10 rounded-full overflow-hidden">
+      <div className="flex items-center gap-3">
+        <div className="h-2 flex-1 bg-white/10 rounded-full overflow-hidden">
           <div
             className="h-full bg-white/30 transition-all duration-1000 ease-out"
             style={{ width: `${pct2}%` }}
@@ -92,78 +92,89 @@ const SpecWarsClient = ({ products }: Props) => {
   if (!activeProduct || !compareProduct) return null;
 
   return (
-    <div className="w-full flex flex-col lg:flex-row bg-zinc-950 rounded-xl shadow-2xl overflow-hidden border border-white/10 text-white">
+    <div className="w-full flex flex-col lg:flex-row bg-zinc-950 rounded-2xl shadow-2xl overflow-hidden border border-white/10 text-white">
       {/* LEFT SIDE: Controls */}
       <div className="lg:w-2/5 p-8 lg:p-12 border-b lg:border-b-0 lg:border-r border-white/10 bg-zinc-900/50 backdrop-blur-md relative flex flex-col justify-between">
-        <div>
-          <h2 className="mb-2 text-indigo-400 font-medium tracking-wide uppercase text-xs">
-            The Spec Wars
-          </h2>
-          <h3 className="text-3xl md:text-4xl font-extrabold tracking-tighter mb-6 text-white">
-            Compare <br /> The Titans.
-          </h3>
-          <p className="text-zinc-400 text-sm leading-relaxed">
-            Select a flagship to see how it stacks up against the competition.
-          </p>
-        </div>
+        <div className="space-y-6">
+          <div>
+            <h2 className="mb-3 text-indigo-300 font-medium tracking-wide uppercase text-xs">
+              The Spec Wars
+            </h2>
+            <h3 className="text-3xl md:text-4xl lg:text-5xl font-extrabold tracking-tighter mb-4 text-white leading-tight">
+              Compare <br /> The Titans.
+            </h3>
+            <p className="text-zinc-400 text-sm leading-relaxed max-w-sm">
+              Select a flagship to see how it stacks up against the competition
+              in raw performance.
+            </p>
+          </div>
 
-        <div className="mt-8 lg:mt-12 flex flex-col gap-3">
-          {products.map((prod, index) => (
-            <button
-              key={prod.id}
-              onClick={() => setActiveIndex(index)}
-              className={`relative w-full flex items-center gap-4 p-3 rounded-xl border transition-all duration-300 group ${
-                activeIndex === index
-                  ? "bg-white/10 border-indigo-500/50 shadow-[0_0_20px_rgba(99,102,241,0.1)]"
-                  : "bg-transparent border-white/10 hover:bg-white/5"
-              }`}
-            >
-              <div className="relative w-12 h-12 rounded-lg overflow-hidden border border-white/10 bg-black shrink-0">
-                <Image
-                  src={prod.mainImagePath}
-                  alt={`${prod.name} for ${prod.mainImagePath}`}
-                  fill
-                  className="object-cover"
-                  unoptimized
-                />
-              </div>
-              <div className="text-left min-w-0">
-                <span
-                  className={`block text-sm font-bold truncate ${
-                    activeIndex === index ? "text-white" : "text-zinc-400"
-                  }`}
-                >
-                  {prod.name}
-                </span>
-                {activeIndex === index && (
-                  <span className="text-[10px] text-indigo-400 font-medium uppercase tracking-wider">
-                    Selected
+          <div className="mt-10 flex flex-col gap-4">
+            {products.map((prod, index) => (
+              <button
+                key={prod.id}
+                onClick={() => setActiveIndex(index)}
+                className={`relative w-full flex items-center gap-5 p-4 rounded-xl border transition-all duration-300 group ${
+                  activeIndex === index
+                    ? "bg-white/10 border-indigo-500/50 shadow-[0_0_20px_rgba(99,102,241,0.1)]"
+                    : "bg-transparent border-white/10 hover:bg-white/5"
+                }`}
+              >
+                <div className="relative w-14 h-14 rounded-lg overflow-hidden border border-white/10 bg-black shrink-0">
+                  <Image
+                    src={prod.mainImagePath}
+                    alt={`${prod.name} thumbnail`}
+                    fill
+                    sizes="64px"
+                    loading="lazy"
+                    className="object-cover"
+                    unoptimized
+                  />
+                </div>
+                <div className="text-left min-w-0 flex-1">
+                  <span
+                    className={`block text-base font-bold truncate ${
+                      activeIndex === index
+                        ? "text-white"
+                        : "text-zinc-400 group-hover:text-zinc-300"
+                    }`}
+                  >
+                    {prod.name}
                   </span>
+                  {activeIndex === index && (
+                    <span className="text-[10px] text-indigo-300 font-bold uppercase tracking-wider mt-1 block">
+                      Active Selection
+                    </span>
+                  )}
+                </div>
+                {activeIndex === index && (
+                  <div className="bg-indigo-500/20 p-1.5 rounded-full">
+                    <Check className="w-5 h-5 text-indigo-400 shrink-0" />
+                  </div>
                 )}
-              </div>
-              {activeIndex === index && (
-                <Check className="ml-auto w-5 h-5 text-indigo-400 shrink-0" />
-              )}
-            </button>
-          ))}
+              </button>
+            ))}
+          </div>
         </div>
 
-        <div className="mt-8 pt-6 border-t border-white/10 flex justify-between items-center">
-          <span className="text-xs text-zinc-500 truncate max-w-[150px]">
+        <div className="mt-10 pt-8 border-t border-white/10 flex justify-between items-center">
+          <span className="text-xs text-zinc-400 font-medium truncate max-w-[150px]">
             {activeProduct.name}
           </span>
           <Link
             href={`/products/${activeProduct.id}`}
-            className="text-xs font-bold text-white flex items-center gap-1 hover:text-indigo-400 transition-colors shrink-0"
+            className="text-xs font-bold text-white flex items-center gap-2 hover:text-indigo-300 transition-colors shrink-0 group"
           >
-            Full Details <ArrowRight className="w-3 h-3" />
+            Full Details
+            <ArrowRight className="w-3 h-3 group-hover:translate-x-1 transition-transform" />
           </Link>
         </div>
       </div>
 
       {/* RIGHT SIDE: Data Grid */}
-      <div className="lg:w-3/5 bg-zinc-950">
-        <div className="grid grid-cols-12 gap-4 px-8 py-4 border-b border-white/10 bg-zinc-900/50 text-xs font-bold uppercase tracking-wider text-zinc-500">
+      <div className="lg:w-3/5 bg-zinc-950 flex flex-col">
+        {/* Header Row */}
+        <div className="grid grid-cols-12 gap-6 px-8 py-5 border-b border-white/10 bg-zinc-900/50 text-xs font-bold uppercase tracking-wider text-zinc-400 sticky top-0 z-10">
           <div className="col-span-4">Feature</div>
           <div className="col-span-8 flex justify-between px-2">
             <span>Current</span>
@@ -171,38 +182,37 @@ const SpecWarsClient = ({ products }: Props) => {
           </div>
         </div>
 
+        {/* Scrollable specs area if needed, otherwise auto height */}
         <div className="divide-y divide-white/5">
           {SPEC_ORDER.map((spec, idx) => {
             const rawV1 = activeProduct.quickSpecs?.[spec.key];
             const rawV2 = compareProduct.quickSpecs?.[spec.key];
 
-            // If BOTH values are missing/null, hide the row entirely
             if (!rawV1 && !rawV2) return null;
 
             return (
               <div
                 key={spec.key}
-                className={`grid grid-cols-12 gap-4 px-8 py-5 items-center transition-colors hover:bg-white/5 ${
+                className={`grid grid-cols-12 gap-6 px-8 py-6 items-center transition-colors hover:bg-white/5 ${
                   idx % 2 !== 0 ? "bg-white/2" : "bg-transparent"
                 }`}
               >
-                <div className="col-span-4 text-sm font-medium text-zinc-400">
+                <div className="col-span-4 text-sm font-medium text-zinc-300">
                   {spec.label}
                 </div>
 
                 <div className="col-span-8">
-                  <div className="flex justify-between items-center mb-1">
+                  <div className="flex justify-between items-baseline mb-2">
                     {/* Active Value */}
-                    <span className="text-lg font-bold text-white">
+                    <span className="text-lg md:text-xl font-bold text-white">
                       {formatValue(rawV1, spec.unit)}
                     </span>
                     {/* Rival Value */}
-                    <span className="text-sm font-mono text-zinc-600">
+                    <span className="text-sm font-mono text-zinc-400">
                       {formatValue(rawV2, spec.unit)}
                     </span>
                   </div>
 
-                  {/* Bar Chart */}
                   {spec.isNumeric && (
                     <ComparisonBar
                       activeValue={rawV1}
@@ -216,8 +226,9 @@ const SpecWarsClient = ({ products }: Props) => {
           })}
         </div>
 
-        <div className="p-6 text-center border-t border-white/5">
-          <p className="text-[10px] text-zinc-600 uppercase tracking-widest">
+        {/* Footer Disclaimer */}
+        <div className="p-8 text-center border-t border-white/5 mt-auto">
+          <p className="text-[11px] text-zinc-400 font-medium uppercase tracking-widest opacity-80">
             * Live Comparison based on technical specifications
           </p>
         </div>

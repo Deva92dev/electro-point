@@ -238,7 +238,7 @@ export const getProductDetails = (src: string): string => {
       width: 1200,
       height: 1200,
       crop: "maintain_ratio",
-      quality: 95,
+      quality: 85,
       format: "auto",
       progressive: true,
       sharpen: 2, // for zoom

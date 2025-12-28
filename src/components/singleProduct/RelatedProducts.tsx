@@ -39,7 +39,8 @@ const RelatedProducts = async ({ currentProduct }: Props) => {
           href="/products"
           className="text-sm font-bold text-primary hover:underline flex items-center gap-1"
         >
-          View Collection <ArrowRight className="w-4 h-4" />
+          View Collection{" "}
+          <ArrowRight className="w-4 h-4" aria-label="next-item in the list" />
         </Link>
       </div>
 
@@ -68,6 +69,8 @@ const RelatedProducts = async ({ currentProduct }: Props) => {
                     src={prod.mainImagePath}
                     alt={prod.name}
                     fill
+                    loading="lazy"
+                    sizes="(max-width: 768px) 100vw, (max-width:1200px) 50vw, 33vw"
                     className="object-contain transition-transform duration-500 group-hover:scale-110 group-hover:-translate-y-2"
                     unoptimized
                   />
@@ -83,7 +86,7 @@ const RelatedProducts = async ({ currentProduct }: Props) => {
                       variant="ghost"
                       className="h-8 w-8 rounded-full hover:bg-primary hover:text-white"
                     >
-                      <Plus className="w-4 h-4" />
+                      <Plus className="w-4 h-4" aria-label="plus button" />
                     </Button>
                   </div>
                 </div>

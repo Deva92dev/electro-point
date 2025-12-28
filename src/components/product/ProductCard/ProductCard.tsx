@@ -69,8 +69,9 @@ const ProductCard = ({ product, isAuthenticated }: Props) => {
           alt={product.name}
           fill
           loading="lazy"
+          unoptimized
           className="object-cover transition-transform duration-500 group-hover:scale-105"
-          sizes="(max-width: 768px) 100vw, (max-width:1200px) 50vw, 33vw "
+          sizes="(max-width: 768px) 100vw, (max-width:1200px) 50vw, 33vw"
         />
         {product.salePrice && (
           <div className="absolute top-2 left-2 bg-destructive text-destructive-foreground text-[10px] font-bold px-2 py-1 rounded-full">
@@ -105,9 +106,9 @@ const ProductCard = ({ product, isAuthenticated }: Props) => {
       {/* INFO AREA */}
       <div className="space-y-1">
         <Link href={`/products/${product.id}`} className="block">
-          <h3 className="font-light truncate text-foreground">
+          <h2 className="truncate text-foreground font-light">
             {product.name}
-          </h3>
+          </h2>
         </Link>
         <div className="flex items-center gap-2 text-sm">
           {product.salePrice ? (
@@ -127,7 +128,7 @@ const ProductCard = ({ product, isAuthenticated }: Props) => {
         </div>
         {/* COLOR SWATCHES  */}
         {product.variants.length > 0 && (
-          <div className="flex items-center gap-1.5 mt-2 h-6">
+          <div className="flex items-center gap-3 mt-3 min-h-6">
             {product.variants.slice(0, 5).map((v, i) => {
               const colorInfo = product.availableColors?.find(
                 (c) => c.name === v.color
@@ -142,12 +143,11 @@ const ProductCard = ({ product, isAuthenticated }: Props) => {
                     setHoveredColor(v.color);
                   }}
                   onMouseLeave={() => setHoveredColor(null)}
-                  // Support click for touch devices
                   onClick={(e) => {
                     e.preventDefault();
                     setActiveImage(v.image);
                   }}
-                  className={`w-4 h-4 rounded-full border border-border transition-transform hover:scale-110 focus:outline-none focus:ring-1 focus:ring-primary ${
+                  className={`w-6 h-6 rounded-full border border-border transition-transform hover:scale-110 focus:outline-none focus:ring-1 focus:ring-primary ${
                     activeImage === v.image
                       ? "ring-1 ring-primary ring-offset-1"
                       : ""

@@ -77,7 +77,7 @@ const FilterSidebar = ({ categories, brands }: Props) => {
   return (
     <div className="space-y-8">
       <div className="flex items-center justify-between">
-        <h3 className="font-semibold text-lg">Filters</h3>
+        <h2 className="font-semibold text-lg">Filters</h2>
         {(currentBrand ||
           currentCategory ||
           currentColor ||
@@ -95,9 +95,9 @@ const FilterSidebar = ({ categories, brands }: Props) => {
 
       {/* category */}
       <div className="space-y-3">
-        <h4 className="font-medium text-sm text-muted-foreground uppercase tracking-wider">
+        <h3 className="font-medium text-sm text-muted-foreground uppercase tracking-wider">
           Categories
-        </h4>
+        </h3>
         <div className="space-y-2">
           {categories.map((cat) => (
             <button

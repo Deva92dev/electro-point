@@ -28,8 +28,9 @@ const PaginationControl = ({ currentPage, totalPages }: Props) => {
         size="icon"
         disabled={currentPage <= 1}
         onClick={() => handlePageChange(currentPage - 1)}
+        aria-label="left-button"
       >
-        <ChevronLeftCircle className="w-4 h-4" />
+        <ChevronLeftCircle className="w-4 h-4 cursor-pointer" />
       </Button>
       <span className="text-sm font-medium px-4">
         Page {currentPage} of {totalPages}
@@ -39,8 +40,9 @@ const PaginationControl = ({ currentPage, totalPages }: Props) => {
         size="icon"
         disabled={currentPage >= totalPages}
         onClick={() => handlePageChange(currentPage + 1)}
+        aria-label="right-button"
       >
-        <ChevronRightCircle className="w-4 h-4" />
+        <ChevronRightCircle className="w-4 h-4 cursor-pointer" />
       </Button>
     </div>
   );

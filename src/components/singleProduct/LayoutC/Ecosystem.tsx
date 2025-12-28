@@ -38,7 +38,7 @@ const Ecosystem = ({ product }: Props) => {
           <div className="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
             <feature.icon className="w-6 h-6 text-primary" />
           </div>
-          <h3 className="text-xl font-bold mb-3">{feature.title}</h3>
+          <h2 className="text-xl font-bold mb-3">{feature.title}</h2>
           <p className="text-muted-foreground leading-relaxed">
             {feature.desc}
           </p>

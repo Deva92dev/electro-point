@@ -71,3 +71,34 @@ export interface ComparisonProduct {
 
 export type ProductDetailsType = Awaited<ReturnType<typeof getProductById>>;
 export type HeroImage = Awaited<ReturnType<typeof getHeroImages>>[number];
+
+export interface ProductSearchParams {
+  page?: string;
+  sort?: string;
+  minPrice?: string;
+  maxPrice?: string;
+  color?: string;
+  search?: string;
+  brand?: string;
+  category?: string;
+  productType?: string;
+}
+
+export interface ProductFrontend {
+  id: number;
+  name: string;
+  slug: string;
+  mainImagePath: string;
+  basePrice: string;
+  salePrice: string | null;
+  isFavorite: boolean;
+  brand: { name: string } | null;
+  category: { name: string };
+  availableColors: { name: string; hex: string }[] | null;
+  variants: {
+    id: number;
+    color: string | null;
+    image: string;
+    stock: number;
+  }[];
+}

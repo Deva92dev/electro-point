@@ -101,7 +101,7 @@ const HeroConfigurator = ({ product, isFavorite = false }: Props) => {
                 />
 
                 <Button className="rounded-full text-white/70 cursor-pointer">
-                  <Share2 className="w-4 h-4" />
+                  <Share2 className="w-4 h-4" aria-label="share button" />
                 </Button>
               </div>
             </div>

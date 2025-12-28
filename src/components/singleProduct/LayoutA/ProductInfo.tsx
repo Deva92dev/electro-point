@@ -34,13 +34,13 @@ const ProductInfo = ({ product, isFavorite = false }: InfoProps) => {
             <span>.</span>
             <span>{product.category.name}</span>
           </div>
-          <div className="flex gap-2">
+          <div className="flex gap-2 md:gap-4">
             <FavoriteToggle
               productId={product.id}
               initialIsFavorite={isFavorite}
             />
             <Button className="rounded-full text-white/70 cursor-pointer">
-              <Share2 className="w-4 h-4" />
+              <Share2 className="w-4 h-4" aria-label="share button" />
             </Button>
           </div>
         </div>
@@ -161,7 +161,7 @@ const ProductInfo = ({ product, isFavorite = false }: InfoProps) => {
       </div>
       {/* Deep Dive Specs */}
       <div className="pt-8 space-y-6">
-        <h3 className="text-xl font-bold">Technical Specifications</h3>
+        <h2 className="text-xl">Technical Specifications</h2>
         <div className="divide-y divide-border">
           {Object.entries(specs || {}).map(([key, value]) => {
             // Filter out internal keys like id, productId, dates

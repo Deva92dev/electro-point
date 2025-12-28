@@ -23,21 +23,22 @@ const NavLinks = ({
         const isActive = pathname === link.href;
 
         return (
-          <Link
-            href={`${link.href}`}
-            onClick={onClick}
-            key={link.href}
-            className={`
-                relative px-4 py-2 rounded-full text-sm font-medium transition-all duration-200
+          <li key={link.href}>
+            <Link
+              href={`${link.href}`}
+              onClick={onClick}
+              className={`
+                relative px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 block
                 ${
                   isActive
                     ? "text-primary bg-primary/10"
                     : "text-muted-foreground hover:text-foreground hover:bg-muted"
                 }
               `}
-          >
-            {link.label}
-          </Link>
+            >
+              {link.label}
+            </Link>
+          </li>
         );
       })}
     </ul>

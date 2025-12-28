@@ -7,6 +7,7 @@ import {
   SectionSkeleton,
   ServicesSkeleton,
 } from "@/components/Home/Velocity/Skeletons";
+import { Metadata } from "next";
 
 const FeaturedCollections = dynamic(
   () => import("@/components/Home/Hero/Hero"),
@@ -36,9 +37,46 @@ const Services = dynamic(() => import("@/components/Home/Services"), {
   loading: () => <ServicesSkeleton />,
 });
 
+export const metadata: Metadata = {
+  title: "ElectroPoint - Premium Electronics Store & Tech Accessories",
+  description:
+    "Discover the latest laptops, smartwatches, and accessories at ElectroPoint. Curated tech for modern creators with flash deals and premium support.",
+  keywords: [
+    "electronics",
+    "online tech store",
+    "gaming laptops",
+    "smartphones",
+    "wireless headphones",
+    "tech accessories",
+    "ElectroPoint",
+    "premium gadgets",
+    "buy electronics online",
+  ],
+  alternates: {
+    canonical: "/",
+  },
+  openGraph: {
+    title: "ElectroPoint - Premium Electronics Store & Tech Accessories",
+    description:
+      "Upgrade your workflow with curated tech. Flash deals on top-tier laptops, phones, and gear. Shop ElectroPoint today.",
+    type: "website",
+    locale: "en_US",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "ElectroPoint - Premium Electronics Store & Tech Accessories",
+    description:
+      "Upgrade your workflow with curated tech. Flash deals on top-tier laptops, phones, and gear. Shop ElectroPoint today.",
+  },
+  robots: {
+    index: true,
+    follow: true,
+  },
+};
+
 export default async function Home() {
   return (
-    <>
+    <main>
       <PureHero />
       <div className="mt-12 lg:mt-24">
         <FeaturedCollections />
@@ -50,6 +88,6 @@ export default async function Home() {
       <TrendingNow />
       <ComparisonServer />
       <Services />
-    </>
+    </main>
   );
 }

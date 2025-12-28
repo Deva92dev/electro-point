@@ -1,9 +1,5 @@
 #### Touch-First Interactions (active:scale, touch-manipulation) to make the web app feel native.
 
-### Libraries for my website
-
-    Newsletter Form => react-hook-form + zod
-
 ### why unified motion system
 
 1. You must keep it purely compositional — no internal business logic, no state

@@ -71,7 +71,7 @@ const FeatureShowcase = ({ product }: Props) => {
           <div className="w-12 h-12 rounded-2xl bg-white/5 flex items-center justify-center mb-4 group-hover:bg-white/10 group-hover:scale-110 transition-all">
             <f.icon className="w-6 h-6 text-white" />
           </div>
-          <h4 className="text-zinc-400 text-sm font-medium mb-1">{f.label}</h4>
+          <h3 className="text-zinc-400 text-sm font-medium mb-1">{f.label}</h3>
           <p className="text-white font-bold text-lg">{f.value}</p>
         </div>
       ))}

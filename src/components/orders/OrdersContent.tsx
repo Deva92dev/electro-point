@@ -114,6 +114,8 @@ export async function OrdersContent() {
                         src={validImage}
                         alt={item.product.name}
                         fill
+                        sizes="100px"
+                        unoptimized
                         className="object-cover"
                       />
                     </div>

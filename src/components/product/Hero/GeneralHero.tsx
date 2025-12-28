@@ -10,7 +10,7 @@ const GeneralHero = () => {
           src={HeroImage}
           alt="Product Page Hero Image"
           fill
-          priority
+          preload={true}
           className="object-cover opacity-60"
           sizes="100vw"
         />

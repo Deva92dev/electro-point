@@ -67,8 +67,8 @@ const VisualHero = ({ product, isFavorite = false }: Props) => {
       />
 
       {/* Background Text */}
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-0 w-full text-center pointer-events-none ">
-        <h1 className="text-[12vw] font-black leading-none text-white/5 uppercase tracking-tighter select-none">
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-1 w-full text-center pointer-events-none">
+        <h1 className="text-[16vw] font-black leading-none text-white/10 uppercase tracking-tighter select-none">
           {product.brand?.name}
         </h1>
       </div>
@@ -98,7 +98,7 @@ const VisualHero = ({ product, isFavorite = false }: Props) => {
                   size="icon"
                   className="rounded-full text-white/70 hover:text-white hover:bg-white/10"
                 >
-                  <Share2 className="w-4 h-4" />
+                  <Share2 className="w-4 h-4" aria-label="share button" />
                 </Button>
               </div>
             </div>

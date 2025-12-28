@@ -8,6 +8,8 @@ import {
 } from "@stripe/react-stripe-js";
 import { useState } from "react";
 
+const BASE_URL = process.env.NEXT_PUBLIC_APP_URL || "localhost://3000";
+
 const CheckoutForm = () => {
   const stripe = useStripe();
   const elements = useElements();
@@ -26,7 +28,7 @@ const CheckoutForm = () => {
       const { error } = await stripe.confirmPayment({
         elements,
         confirmParams: {
-          return_url: `${process.env.NEXT_PUBLIC_APP_URL}/checkout/sucess`,
+          return_url: `${BASE_URL}/checkout/sucess`,
         },
       });
 

@@ -5,6 +5,7 @@ import {
 } from "@/components/product/Skeletons";
 import { FilterGate, ListingGate } from "@/components/product/DynamicWrapper";
 import HeroSection from "@/components/product/Hero/HeroSection";
+import HeroSkeleton from "@/components/product/Hero/HeroSkeleton";
 
 type PageProps = {
   searchParams: Promise<{
@@ -25,9 +26,7 @@ const ProductPage = async (props: PageProps) => {
 
   return (
     <main className="min-h-screen bg-background pb-12">
-      <Suspense
-        fallback={<div className="h-[300px] w-full bg-muted animate-pulse" />}
-      >
+      <Suspense fallback={<HeroSkeleton />}>
         <HeroSection paramsPromise={searchParamsPromise} />
       </Suspense>
 

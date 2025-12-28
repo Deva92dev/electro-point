@@ -7,8 +7,6 @@ import {
   and,
   eq,
   isNotNull,
-  lte,
-  SQL,
   sql,
   exists,
   desc,
@@ -16,23 +14,29 @@ import {
   like,
   or,
   ilike,
-  gte,
   inArray,
   ne,
 } from "drizzle-orm";
 import { db } from "@/db";
-import {
-  brands,
-  categories,
-  products,
-  productTags,
-  productVariants,
-  tags,
-} from "@/db/schema";
+import { categories, products, productTags, tags } from "@/db/schema";
 import { categoryTypes, ComparisonProduct } from "../types";
 import { getHeroImage, getProductCard } from "@/lib/imagekit-loader";
 import { getImagesFromFolder } from "@/db/utils/imagekit-helper";
 import { transformedProductImage } from "../util";
+
+export const getProductsForSitemap = async () => {
+  cacheLife("days");
+  cacheTag("sitemap-products");
+
+  return db
+    .select({
+      id: products.id,
+      updatedAt: products.updatedAt,
+    })
+    .from(products)
+    .where(eq(products.isActive, true))
+    .orderBy(desc(products.updatedAt));
+};
 
 export const getHeroImages = async () => {
   cacheLife("hours");
@@ -179,172 +183,6 @@ export const getProductForComparison = async (): Promise<
       ? getProductCard(encodeURI(prod.mainImagePath))
       : "/placeholder.jpg",
   }));
-};
-
-export const getAllProducts = async (params: {
-  page?: string;
-  sort?: string;
-  maxPrice?: string;
-  minPrice?: string;
-  color?: string;
-  search?: string;
-  brand?: string;
-  productType?: string;
-  category?: string;
-}) => {
-  const ITEMS_PER_PAGE = 12;
-  const page = Number(params.page) || 1;
-  const offset = (page - 1) * ITEMS_PER_PAGE;
-
-  const conditions: (SQL<unknown> | undefined)[] = [
-    eq(products.isActive, true),
-    isNotNull(products.mainImagePath),
-  ];
-
-  // add search params to conditions
-  if (params.search) {
-    conditions.push(ilike(products.name, `%${params.search}%`));
-  }
-  if (params.productType) {
-    conditions.push(eq(products.productType, params.productType as any));
-  }
-  if (params.minPrice) {
-    conditions.push(gte(products.basePrice, `${params.minPrice}`));
-  }
-  if (params.maxPrice) {
-    conditions.push(lte(products.basePrice, `${params.maxPrice}`));
-  }
-
-  if (params.color) {
-    conditions.push(
-      sql`${products.availableColors} @> ${JSON.stringify([
-        { name: params.color },
-      ])}`
-    );
-  }
-
-  if (params.brand) {
-    conditions.push(
-      inArray(
-        products.brandId,
-        db
-          .select({ id: brands.id })
-          .from(brands)
-          .where(eq(brands.slug, params.brand))
-      )
-    );
-  }
-  if (params.category) {
-    conditions.push(
-      inArray(
-        products.categoryId,
-        db
-          .select({ id: categories.id })
-          .from(categories)
-          .where(eq(categories.slug, params.category))
-      )
-    );
-  }
-
-  // sorting
-  let orderBy = desc(products.createdAt);
-
-  switch (params.sort) {
-    case "price-asc":
-      orderBy = asc(products.basePrice);
-      break;
-    case "price-desc":
-      orderBy = desc(products.basePrice);
-      break;
-    case "a-z":
-      orderBy = asc(products.name);
-      break;
-    case "z-a":
-      orderBy = desc(products.name);
-      break;
-  }
-
-  // query db
-  const [data, totalCount] = await Promise.all([
-    db.query.products.findMany({
-      where: and(...conditions),
-      limit: ITEMS_PER_PAGE,
-      offset: offset,
-      orderBy: [orderBy],
-      columns: {
-        id: true,
-        slug: true,
-        name: true,
-        basePrice: true,
-        salePrice: true,
-        mainImagePath: true,
-        productType: true,
-        availableColors: true,
-      },
-      with: {
-        category: { columns: { name: true } },
-        brand: { columns: { name: true } },
-        variants: {
-          columns: {
-            color: true,
-            imagePath: true,
-            id: true,
-            stockQuantity: true,
-          },
-          where: isNotNull(productVariants.imagePath),
-        },
-      },
-    }),
-    db
-      .select({ count: sql<number>`count(*)` })
-      .from(products)
-      .where(and(...conditions)),
-  ]);
-
-  const totalItems = Number(totalCount[0]?.count || 0);
-  const totalPages = Math.ceil(totalItems / ITEMS_PER_PAGE);
-
-  // image transform and image select filter
-  const allProducts = data.map((prod) => {
-    let activeImage = prod.mainImagePath;
-
-    // If the user filtered by a color (e.g. "Red"), try to find the "Red" variant image
-    // This ensures the grid looks correct immediately without client-side JS
-    if (params.color) {
-      const matchingVariant = prod.variants.find(
-        (v) => v.color?.toLowerCase() === params.color?.toLowerCase()
-      );
-
-      if (matchingVariant?.imagePath) {
-        activeImage = matchingVariant.imagePath;
-      }
-    }
-
-    return {
-      ...prod,
-      mainImagePath: activeImage
-        ? getProductCard(encodeURI(activeImage))
-        : "/placeholder.jpg",
-      // We also transform the variant images so the frontend can use them directly
-      variants: prod.variants.map((v) => ({
-        id: v.id,
-        color: v.color,
-        image: v.imagePath
-          ? getProductCard(encodeURI(v.imagePath))
-          : "/placeholder.jpg",
-        stock: v.stockQuantity,
-      })),
-    };
-  });
-
-  return {
-    products: allProducts,
-    pagination: {
-      currentPage: page,
-      totalPages,
-      totalItems,
-    },
-  };
 };
 
 export const getFilterOptions = async () => {
