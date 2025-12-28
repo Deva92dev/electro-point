@@ -15,7 +15,14 @@ const Dropdown = () => {
   return (
     <div>
       <Button variant="ghost" size="icon" onClick={toggleMenu}>
-        {isOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+        {isOpen ? (
+          <X className="w-6 h-6" aria-label="close menu for navigation" />
+        ) : (
+          <Menu
+            className="w-6 h-6"
+            aria-label="hamburger menu for navigation"
+          />
+        )}
       </Button>
 
       {isOpen && (

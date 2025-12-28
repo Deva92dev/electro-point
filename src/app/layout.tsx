@@ -9,11 +9,13 @@ import CartSheet from "@/components/cart/CartSheet";
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
+  display: "swap",
 });
 
 const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
   subsets: ["latin"],
+  display: "swap",
 });
 
 export const metadata: Metadata = {
@@ -24,6 +26,8 @@ export const metadata: Metadata = {
     default: "ElectroPoint – Premium Electronics for Creators",
     template: "%s | ElectroPoint",
   },
+  description:
+    "Discover the latest laptops, smartwatches, and accessories at ElectroPoint. Curated tech for modern creators.",
   alternates: {
     canonical: "/",
   },
@@ -73,7 +77,7 @@ export default function RootLayout({
         />
       </head>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased glass`}
+        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <ClientProviders>
           <Navbar />

@@ -9,20 +9,17 @@ const PureHero = () => {
     <section className="relative w-full min-h-[calc(100vh-4rem)] lg:min-h-[90vh] flex items-center overflow-hidden pt-12 pb-16 lg:py-0 bg-[#ffffff] dark:bg-[#0f172a]">
       {/* Background Pattern */}
       <div className="absolute inset-0 -z-10 h-full w-full bg-[linear-gradient(to_right,#8080800a_1px,transparent_1px),linear-gradient(to_bottom,#8080800a_1px,transparent_1px)] bg-size-[14px_24px]">
-        <div className="absolute left-0 right-0 top-0 -z-10 m-auto h-[300px] w-[300px] md:h-[400px] md:w-[400px] rounded-full bg-[#4338ca] dark:bg-[#818cf8] opacity-10 blur-[100px]"></div>
+        <div className="absolute hidden md:block left-0 right-0 top-0 -z-10 m-auto h-[300px] w-[300px] md:h-[400px] md:w-[400px] rounded-full bg-[#4338ca] dark:bg-[#818cf8] opacity-10 blur-[100px]"></div>
       </div>
 
       <div className="container px-4 md:px-8 mx-auto relative">
+        {/* Dotted Line */}
         <svg
           className="absolute hidden lg:block z-0 pointer-events-none"
           width="300"
           height="150"
           viewBox="0 0 300 150"
-          style={{
-            left: "45%", // Pushes it to the gap between columns
-            top: "20%",
-            color: "#4338ca",
-          }}
+          style={{ left: "45%", top: "25%", color: "#4338ca" }}
         >
           <path
             d="M 0 120 Q 150 20 280 80"
@@ -41,17 +38,15 @@ const PureHero = () => {
         </svg>
 
         <div className="grid lg:grid-cols-2 gap-8 items-center relative z-10">
-          {/* LEFT COLUMN: Text Content */}
-          <div className="flex flex-col space-y-6 md:space-y-8 text-center lg:text-left animate-in fade-in slide-in-from-bottom-8 duration-700">
+          {/* Text Content */}
+          <div className="flex flex-col space-y-6 md:space-y-8 text-center lg:text-left">
             <div className="space-y-4">
-              <h1 className="text-4xl sm:text-5xl font-extrabold tracking-tight lg:text-6xl xl:text-8xl relative z-20 text-[#111111] dark:text-[#f8fafc]">
+              <h1 className="text-4xl sm:text-5xl font-extrabold tracking-tight lg:text-6xl xl:text-8xl relative z-20 text-[#111111] dark:text-[#f8fafc] md:text-balance">
                 Smart Tech <br />
-                {/* 'inline-block' to allow padding to push text apart */}
                 <span className="relative inline-block text-[#4338ca] dark:text-[#818cf8] mt-2">
                   For Smarter <br />
                   <span className="relative inline-block pt-3 pb-2">
                     Living
-                    {/* SVG Underline attached specifically to 'Living' */}
                     <svg
                       className="absolute w-full h-3 -bottom-1 left-0 opacity-30 -z-10 text-[#4338ca] dark:text-[#818cf8]"
                       viewBox="0 0 100 10"
@@ -67,7 +62,8 @@ const PureHero = () => {
                   </span>
                 </span>
               </h1>
-              <p className="mx-auto lg:mx-0 max-w-[550px] xl:max-w-[700px] text-lg md:text-2xl leading-relaxed text-[#64748b] dark:text-[#94a3b8]">
+
+              <p className="mx-auto lg:mx-0 max-w-none sm:max-w-[550px] xl:max-w-[700px] text-lg md:text-2xl leading-relaxed text-[#64748b] dark:text-[#94a3b8] md:text-balance font-medium">
                 Discover the latest laptops, smartphones, and gadgets designed
                 to elevate your productivity. Two-day delivery on all premium
                 items.
@@ -75,7 +71,7 @@ const PureHero = () => {
             </div>
 
             <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
-              <Link href="/products">
+              <Link href="/products" prefetch={true}>
                 <Button
                   size="lg"
                   className="rounded-full w-full sm:w-auto px-10 h-14 text-lg font-semibold bg-[#4338ca] hover:bg-[#4338ca]/90 text-white dark:bg-[#818cf8] dark:hover:bg-[#818cf8]/90 dark:text-[#0f172a]"
@@ -107,7 +103,7 @@ const PureHero = () => {
                         alt="Customer"
                         fill
                         loading="lazy"
-                        sizes="64px"
+                        sizes="40px"
                         className="object-cover"
                       />
                     </div>
@@ -123,9 +119,8 @@ const PureHero = () => {
             </div>
           </div>
 
-          {/* RIGHT COLUMN: Image & Patterns */}
+          {/* RIGHT COLUMN: Image */}
           <div className="relative flex justify-center items-center lg:justify-end mt-8 lg:mt-0 w-full">
-            {/* Blob SVG */}
             <svg
               className="absolute w-[120%] h-[120%] lg:w-[160%] lg:h-[160%] -z-10 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 scale-110 lg:translate-x-12 text-[#4338ca]/10 dark:text-[#818cf8]/20"
               viewBox="0 0 200 200"
@@ -144,12 +139,11 @@ const PureHero = () => {
                 alt="Person holding laptop with tech gear"
                 fill
                 preload={true}
-                className="object-contain drop-shadow-2xl hover:scale-105 transition-transform duration-500"
                 sizes="(max-width: 640px) 100vw, (max-width: 1024px) 500px, (max-width: 1280px) 750px, 900px"
+                className="object-contain md:drop-shadow-2xl hover:scale-105 transition-transform duration-500"
               />
 
-              {/* Floating Card */}
-              <div className="absolute bottom-4 -left-2 sm:bottom-10 sm:left-0 md:backdrop-blur-md p-4 rounded-2xl shadow-xl animate-in fade-in slide-in-from-right-8 duration-1000 delay-300 bg-[#ffffff]/90 border border-[#e2e8f0]/50 dark:bg-[#0f172a]/90 dark:border-[#334155]/50">
+              <div className="absolute bottom-4 -left-2 sm:bottom-10 sm:left-0 p-4 rounded-2xl shadow-xl bg-[#ffffff]/95 border border-[#e2e8f0]/50 dark:bg-[#0f172a]/95 dark:border-[#334155]/50 md:backdrop-blur-md">
                 <div className="flex items-center gap-4">
                   <div className="w-12 h-12 rounded-full flex items-center justify-center bg-[#dcfce7] dark:bg-[#14532d]">
                     <span className="font-bold text-xl text-[#16a34a] dark:text-[#4ade80]">

@@ -3,11 +3,7 @@ import dynamic from "next/dynamic";
 import ActionButtons from "./ActionButtons";
 import Logo from "./Logo";
 import NavLinks from "./NavLinks";
-import {
-  ActionsSkeleton,
-  DropdownSkeleton,
-  NavLinksSkeleton,
-} from "./ActionSkeleton";
+import { ActionsSkeleton, DropdownSkeleton } from "./ActionSkeleton";
 
 const Dropdown = dynamic(() => import("./Dropdown"), {
   loading: () => <DropdownSkeleton />,
@@ -22,9 +18,7 @@ const Navbar = () => {
         </div>
 
         <div className="hidden lg:block">
-          <Suspense fallback={<NavLinksSkeleton />}>
-            <NavLinks />
-          </Suspense>
+          <NavLinks />
         </div>
 
         <div className="flex items-center gap-2 md:gap-4">
