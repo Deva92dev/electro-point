@@ -43,7 +43,6 @@ const ProductCard = ({ product, isAuthenticated }: Props) => {
   const [activeImage, setActiveImage] = useState(product.mainImagePath);
   const [hoveredColor, setHoveredColor] = useState<string | null>(null);
 
-  // If hovering a color, pick that. If not, pick the one matching the active image. If neither, fallback to the first variant.
   const selectedVariant =
     product.variants.find((v) => v.color === hoveredColor) ||
     product.variants.find((v) => v.image === activeImage) ||
@@ -59,7 +58,7 @@ const ProductCard = ({ product, isAuthenticated }: Props) => {
     : undefined;
 
   return (
-    <div className="group flex flex-col h-full space-y-3">
+    <div className="group flex flex-col h-full space-y-4">
       <Link
         href={`/products/${product.id}`}
         className="relative aspect-4/5 overflow-hidden rounded-xl bg-muted"
@@ -87,7 +86,7 @@ const ProductCard = ({ product, isAuthenticated }: Props) => {
             />
           </div>
         )}
-        {/* QUICK ADD BUTTON */}
+
         <div className="absolute bottom-4 right-4 translate-y-4 opacity-0 transition-all duration-300 group-hover:translate-y-0 group-hover:opacity-100 z-20">
           <AddToCart
             product={{
@@ -98,6 +97,7 @@ const ProductCard = ({ product, isAuthenticated }: Props) => {
             }}
             selectedVariant={variantForCart}
             currentImage={activeImage}
+            isAuthenticated={isAuthenticated}
             className="rounded-full shadow-lg h-10 w-10 p-0"
           />
         </div>
@@ -126,9 +126,20 @@ const ProductCard = ({ product, isAuthenticated }: Props) => {
             </span>
           )}
         </div>
-        {/* COLOR SWATCHES  */}
+
+        {/* COLOR SWATCHES */}
         {product.variants.length > 0 && (
-          <div className="flex items-center gap-3 mt-3 min-h-6">
+          <div className="relative flex items-center gap-3 mt-3 min-h-6">
+            <div className="absolute -top-5 left-0 h-4 flex items-center pointer-events-none">
+              <span
+                className={`text-[10px] text-muted-foreground transition-opacity duration-200 ${
+                  hoveredColor ? "opacity-100" : "opacity-0"
+                }`}
+              >
+                {hoveredColor || ""}
+              </span>
+            </div>
+
             {product.variants.slice(0, 5).map((v, i) => {
               const colorInfo = product.availableColors?.find(
                 (c) => c.name === v.color
@@ -160,12 +171,6 @@ const ProductCard = ({ product, isAuthenticated }: Props) => {
             {product.variants.length > 5 && (
               <span className="text-[10px] text-muted-foreground">
                 +{product.variants.length - 5}
-              </span>
-            )}
-            {/* Color Label tooltip */}
-            {hoveredColor && (
-              <span className="text-[10px] text-muted-foreground ml-2 animate-in fade-in">
-                {hoveredColor}
               </span>
             )}
           </div>

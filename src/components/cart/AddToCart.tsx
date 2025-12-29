@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { Check, ShoppingCart, Loader2 } from "lucide-react";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { addToCartServer } from "@/utils/actions/mutations";
 
@@ -28,6 +28,7 @@ interface Props {
   currentImage: string;
   className?: string;
   children?: React.ReactNode;
+  isAuthenticated: boolean;
 }
 
 const AddToCart = ({
@@ -36,12 +37,13 @@ const AddToCart = ({
   selectedVariant,
   className,
   children,
+  isAuthenticated,
 }: Props) => {
   const addItem = useCartStore((state) => state.addItem);
   const [isAdded, setIsAdded] = useState(false);
-  // Add loading state for server sync
   const [isLoading, setIsLoading] = useState(false);
   const pathname = usePathname();
+  const router = useRouter();
 
   const effectiveStock = selectedVariant?.stock ?? product.stock ?? 5;
   const effectiveThreshold =
@@ -52,35 +54,55 @@ const AddToCart = ({
     e.preventDefault();
     e.stopPropagation();
 
-    if (isOutOfStock || isLoading) return;
+    if (!isAuthenticated) {
+      toast.error("Please log in to add items to your cart");
+      router.push(`/login?callbackUrl=${pathname}`);
+      return;
+    }
 
+    if (isOutOfStock || isLoading) return;
     setIsLoading(true);
 
     const price = product.salePrice
       ? Number(product.salePrice)
       : Number(product.basePrice);
 
+    const finalImage = selectedVariant?.image || currentImage || "";
+
     const itemToAdd: CartItem = {
       productId: product.id,
       variantId: selectedVariant?.id,
       name: product.name,
       price: price,
-      image: selectedVariant?.image || currentImage,
+      image: finalImage,
       color: selectedVariant?.color || "Default",
       quantity: 1,
       maxStock: effectiveStock,
       lowStockThreshold: effectiveThreshold,
     };
 
-    // Optimistic UI Update (Fast)
+    // 1. Optimistic Update (Show it immediately)
     addItem(itemToAdd);
 
     try {
-      await addToCartServer(product.id, selectedVariant?.id, 1);
-      setIsAdded(true);
-    } catch (err) {
-      console.error("Server sync failed", err);
-      toast.error("Could not save to account (Guest mode)");
+      console.log("📤 Sending to server:", {
+        productId: product.id,
+        variantId: selectedVariant?.id,
+      });
+
+      //  CALL SERVER
+      const result = await addToCartServer(product.id, selectedVariant?.id, 1);
+
+      // CHECK RESULT
+      if (result && result.success) {
+        setIsAdded(true);
+        toast.success("Added to cart");
+      } else {
+        throw new Error(result?.message || "Server returned false");
+      }
+    } catch (err: any) {
+      toast.error(`Sync failed: ${err.message}`);
+      // Optional: Remove the item from store if it failed?
     } finally {
       setIsLoading(false);
     }
@@ -96,13 +118,10 @@ const AddToCart = ({
 
   const renderContent = () => {
     if (isLoading) return <Loader2 className="w-5 h-5 animate-spin" />;
-
     if (children) return children;
     if (pathname === "/products")
       return <ShoppingCart className="w-5 h-5 cursor-pointer" />;
-
     if (isOutOfStock) return "Out of Stock";
-
     return (
       <>
         <ShoppingCart className="w-5 h-5" /> Add To Cart
@@ -131,7 +150,6 @@ const AddToCart = ({
       >
         {renderContent()}
       </div>
-
       <div
         className={`absolute inset-0 flex items-center justify-center gap-2 transition-transform duration-300 ${
           isAdded ? "translate-y-0" : "translate-y-[150%]"

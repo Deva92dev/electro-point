@@ -1,15 +1,28 @@
 "use client";
 
 import { useCartStore } from "@/store/cart-store";
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState, useMemo, useRef } from "react";
 import { AnimatePresence, m } from "@/components/motion";
 import { Button } from "@/components/ui/button";
-import { Minus, Plus, ShoppingBag, Trash2, X, RefreshCw } from "lucide-react";
+import {
+  Minus,
+  Plus,
+  ShoppingBag,
+  Trash2,
+  X,
+  RefreshCw,
+  Eraser,
+} from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import { validateCart } from "@/utils/actions/mutations";
+import {
+  validateCart,
+  updateCartItemQuantity,
+  clearCartServer,
+} from "@/utils/actions/mutations";
 import SearchInput from "./SearchInput";
 import { formatPrice } from "@/utils/util";
+import { toast } from "sonner";
 
 const CartSheet = () => {
   const {
@@ -21,18 +34,24 @@ const CartSheet = () => {
     getCartTotal,
     syncWithServer,
     isSynced,
+    clearCart,
   } = useCartStore();
 
   const [isMounted, setIsMounted] = useState(false);
   const [isValidating, setIsValidating] = useState(false);
-  const [searchQuery, setSearchQuery] = useState(""); // Local search state
+  const [isClearing, setIsClearing] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+
+  // Ref to hold debounce timers for each product
+  const debounceTimers = useRef<{ [key: string]: NodeJS.Timeout }>({});
 
   useEffect(() => {
     setIsMounted(true);
-    if (items.length > 0 && !isSynced) {
+    // Only validate on OPEN, not on every change
+    if (isOpen && items.length > 0 && !isSynced) {
       handleValidate();
     }
-  }, [items.length, isOpen]);
+  }, [isOpen]);
 
   const handleValidate = async () => {
     setIsValidating(true);
@@ -46,7 +65,45 @@ const CartSheet = () => {
     }
   };
 
-  // LOCAL FILTERING
+  const handleClear = async () => {
+    if (confirm("Are you sure you want to remove all items?")) {
+      setIsClearing(true);
+      try {
+        // Try to clear server first
+        await clearCartServer();
+      } catch (error) {
+        console.error("Failed to clear server cart", error);
+      } finally {
+        // Always clear local client
+        clearCart();
+        setIsClearing(false);
+        toast.success("Cart cleared");
+      }
+    }
+  };
+
+  const handleQuantityChange = (
+    productId: number,
+    variantId: number | undefined,
+    newQty: number
+  ) => {
+    // Instant UI Update (Optimistic)
+    updateQuantity(productId, variantId, newQty);
+
+    // Create a unique key for this item
+    const itemKey = `${productId}-${variantId || "base"}`;
+
+    //  Clear existing timer if user is spamming clicks
+    if (debounceTimers.current[itemKey]) {
+      clearTimeout(debounceTimers.current[itemKey]);
+    }
+
+    debounceTimers.current[itemKey] = setTimeout(async () => {
+      await updateCartItemQuantity(productId, variantId, newQty);
+      delete debounceTimers.current[itemKey];
+    }, 500);
+  };
+
   const filteredItems = useMemo(() => {
     if (!searchQuery) return items;
     const lowerQuery = searchQuery.toLowerCase();
@@ -83,6 +140,20 @@ const CartSheet = () => {
                   </span>
                 </h2>
                 <div className="flex gap-2">
+                  {/* Clear Cart Button */}
+                  {items.length > 0 && (
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={handleClear}
+                      disabled={isClearing}
+                      title="Clear Cart"
+                      className="text-destructive hover:text-destructive hover:bg-destructive/10"
+                    >
+                      <Eraser className="w-4 h-4" />
+                    </Button>
+                  )}
+
                   <Button
                     variant="ghost"
                     size="icon"
@@ -107,7 +178,6 @@ const CartSheet = () => {
                 </div>
               </div>
 
-              {/* SEARCH COMPONENT (Only show if items exist) */}
               {items.length > 0 && (
                 <SearchInput
                   onSearch={setSearchQuery}
@@ -130,7 +200,6 @@ const CartSheet = () => {
                   </Button>
                 </div>
               ) : filteredItems.length === 0 ? (
-                // Empty Search State
                 <div className="flex flex-col items-center justify-center h-40 text-muted-foreground">
                   <p>No items found matching "{searchQuery}"</p>
                   <Button variant="link" onClick={() => setSearchQuery("")}>
@@ -151,13 +220,19 @@ const CartSheet = () => {
                       }`}
                     >
                       <div className="relative w-24 h-24 rounded-xl overflow-hidden bg-white border border-border shrink-0">
-                        <Image
-                          src={i.image}
-                          alt={i.name}
-                          fill
-                          className="object-contain p-2"
-                          unoptimized
-                        />
+                        {i.image ? (
+                          <Image
+                            src={i.image}
+                            alt={i.name}
+                            fill
+                            className="object-contain p-2"
+                            unoptimized
+                          />
+                        ) : (
+                          <div className="w-full h-full bg-gray-200 flex items-center justify-center text-xs text-gray-500">
+                            No Image
+                          </div>
+                        )}
                       </div>
 
                       <div className="flex-1 flex flex-col justify-between py-1">
@@ -183,33 +258,25 @@ const CartSheet = () => {
                             </p>
                           )}
 
+                          {/* Stock Warnings */}
                           {isOutOfStock && (
                             <p className="text-[10px] text-destructive font-bold mt-1">
                               Out of Stock
                             </p>
                           )}
-
                           {!isOutOfStock && isLowStock && (
-                            <div className="mt-1.5 flex items-center gap-1.5 text-[10px] font-bold text-amber-600 bg-amber-500/10 px-2 py-0.5 rounded w-fit animate-in fade-in slide-in-from-left-2">
+                            <div className="mt-1.5 flex items-center gap-1.5 text-[10px] font-bold text-amber-600 bg-amber-500/10 px-2 py-0.5 rounded w-fit">
                               <div className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse" />
                               Hurry! Only {i.maxStock} left
                             </div>
                           )}
-
-                          {!isOutOfStock &&
-                            !isLowStock &&
-                            i.quantity >= i.maxStock && (
-                              <p className="text-[10px] text-orange-500 font-bold mt-1">
-                                Max available stock reached
-                              </p>
-                            )}
                         </div>
 
                         <div className="flex items-center justify-between mt-3">
                           <div className="flex items-center gap-1 border border-border rounded-lg p-1 h-9 bg-background">
                             <button
                               onClick={() =>
-                                updateQuantity(
+                                handleQuantityChange(
                                   i.productId,
                                   i.variantId,
                                   i.quantity - 1
@@ -227,7 +294,7 @@ const CartSheet = () => {
 
                             <button
                               onClick={() =>
-                                updateQuantity(
+                                handleQuantityChange(
                                   i.productId,
                                   i.variantId,
                                   i.quantity + 1
@@ -258,25 +325,17 @@ const CartSheet = () => {
                   <span>Total</span>
                   <span>{formatPrice(getCartTotal())}</span>
                 </div>
-                {!isSynced && (
-                  <div className="text-xs text-orange-500 bg-orange-500/10 p-2 rounded text-center animate-pulse">
-                    Verifying prices and stock...
-                  </div>
-                )}
 
                 <Link
                   href="/checkout"
                   onClick={toggleCart}
-                  className={`block w-full ${
-                    !isSynced ? "pointer-events-none opacity-80" : ""
-                  }`}
+                  className="block w-full"
                 >
                   <Button
                     size="lg"
-                    disabled={!isSynced || isValidating}
                     className="w-full font-bold text-base h-12 shadow-lg shadow-primary/20 cursor-pointer"
                   >
-                    {isValidating ? "Validating Cart..." : "Checkout Now"}
+                    Checkout Now
                   </Button>
                 </Link>
               </div>

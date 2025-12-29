@@ -8,6 +8,7 @@ import LayoutB from "./LayoutB";
 import LayoutC from "./LayoutC";
 import RelatedProducts from "./RelatedProducts";
 import WishlistSync from "../global/WishlistSync";
+import ReviewsSection from "../reviews/ReviewSection";
 
 interface Props {
   paramsPromise: Promise<{ id: string }>;
@@ -61,6 +62,12 @@ export async function ProductContent({ paramsPromise }: Props) {
   return (
     <>
       <LayoutComponent />
+
+      <ReviewsSection
+        productId={productId}
+        isAuthenticated={isAuthenticated}
+        userId={userId}
+      />
       <div className="max-w-7xl mx-auto px-4 lg:px-8">
         <RelatedProducts currentProduct={product} />
       </div>

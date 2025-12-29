@@ -3,7 +3,7 @@
 // Client-callable server actions, do not use use cache/ cache here
 
 import Stripe from "stripe";
-import { and, desc, eq, inArray, lte, sql } from "drizzle-orm";
+import { and, desc, eq, inArray, isNull, lte, sql } from "drizzle-orm";
 import { db } from "@/db";
 import {
   cart,
@@ -12,6 +12,7 @@ import {
   orders,
   products,
   productVariants,
+  reviews,
   wishlists,
 } from "@/db/schema";
 import { auth } from "@/lib/auth";
@@ -182,39 +183,65 @@ export const getUserWishlistProducts = async (): Promise<ProductTypes[]> => {
   });
 };
 
-export async function getCart() {
-  const session = await auth.api.getSession({
-    headers: await headers(),
-  });
+export async function updateCartItemQuantity(
+  productId: number,
+  variantId: number | undefined,
+  quantity: number
+) {
+  const session = await auth.api.getSession({ headers: await headers() });
+  if (!session?.user) return { success: false };
 
-  if (!session?.user) {
-    return null;
+  try {
+    const userCart = await db.query.cart.findFirst({
+      where: eq(cart.userId, session.user.id),
+    });
+    if (!userCart) return { success: false };
+
+    await db
+      .update(cartItems)
+      .set({ quantity })
+      .where(
+        and(
+          eq(cartItems.cartId, userCart.id),
+          variantId
+            ? eq(cartItems.variantId, variantId)
+            : eq(cartItems.productId, productId)
+        )
+      );
+
+    return { success: true };
+  } catch (err) {
+    console.error("Update quantity failed:", err);
+    return { success: false };
   }
+}
 
-  const userId = session.user.id;
+export async function getCart(): Promise<CartItem[] | null> {
+  const session = await auth.api.getSession({ headers: await headers() });
+  if (!session?.user) return null;
 
-  //  Fetch the Cart from the Database
   const userCart = await db.query.cart.findFirst({
-    where: eq(cart.userId, userId),
+    where: eq(cart.userId, session.user.id),
     with: {
       items: {
-        with: {
-          product: true,
-          variant: true,
-        },
+        with: { product: true, variant: true },
+        // Add explicit ordering so items don't jump around
+        orderBy: (items, { desc }) => [desc(items.id)],
       },
     },
   });
 
-  // If no cart exists, Webhook deleted it
-  if (!userCart) {
-    return [];
-  }
+  if (!userCart) return [];
 
   return userCart.items.map((item) => {
-    // Check if it's a Variant or Simple Product
     const isVariant = !!item.variant;
-    const entity = isVariant ? item.variant! : item.product;
+
+    const rawPath =
+      (isVariant ? item.variant!.imagePath : item.product.mainImagePath) || "";
+
+    const fullImageUrl = rawPath
+      ? (transformedProductImage(rawPath) as string)
+      : "";
 
     return {
       productId: item.productId,
@@ -223,9 +250,7 @@ export async function getCart() {
         item.product.name +
         (isVariant ? ` - ${item.variant!.variantName}` : ""),
       price: Number(item.priceAtAdd),
-      image:
-        (isVariant ? item.variant!.imagePath : item.product.mainImagePath) ||
-        "",
+      image: fullImageUrl,
       quantity: item.quantity,
       maxStock: isVariant ? item.variant!.stockQuantity : item.product.stock,
       color: isVariant ? item.variant!.color || "Default" : "Default",
@@ -238,10 +263,7 @@ export const addToCartServer = async (
   variantId: number | undefined,
   quantity: number
 ) => {
-  const session = await auth.api.getSession({
-    headers: await headers(),
-  });
-
+  const session = await auth.api.getSession({ headers: await headers() });
   if (!session?.user) {
     return { success: false, message: "Guest user" };
   }
@@ -249,7 +271,6 @@ export const addToCartServer = async (
   const userId = session.user.id;
 
   try {
-    // Find or Create Cart
     let userCart = await db.query.cart.findFirst({
       where: eq(cart.userId, userId),
     });
@@ -257,46 +278,46 @@ export const addToCartServer = async (
     if (!userCart) {
       const inserted = await db.insert(cart).values({ userId }).returning();
       userCart = inserted[0];
-      if (!userCart) throw new Error("Failed to create cart");
+
+      if (!userCart) {
+        throw new Error("Failed to create new cart in database");
+      }
     }
 
-    // FETCH REAL PRICE (Fixes the 'priceAtAdd' error & Security)
+    // DETERMINE PRICE
     let currentPrice = "0";
-
     if (variantId) {
       const variant = await db.query.productVariants.findFirst({
         where: eq(productVariants.id, variantId),
       });
-      // Fallback logic matches your frontend logic
-      if (variant) {
+      if (variant)
         currentPrice = (variant.salePrice || variant.price).toString();
-      }
     } else {
       const product = await db.query.products.findFirst({
         where: eq(products.id, productId),
       });
-      if (product) {
+      if (product)
         currentPrice = (product.salePrice || product.basePrice).toString();
-      }
     }
 
-    // Check for existing item in cart
+    // FIND EXISTING ITEM
     const existingItem = await db.query.cartItems.findFirst({
       where: and(
         eq(cartItems.cartId, userCart.id),
+        eq(cartItems.productId, productId),
         variantId
           ? eq(cartItems.variantId, variantId)
-          : eq(cartItems.productId, productId)
+          : isNull(cartItems.variantId)
       ),
     });
 
+    // UPSERT
     if (existingItem) {
       await db
         .update(cartItems)
         .set({ quantity: existingItem.quantity + quantity })
         .where(eq(cartItems.id, existingItem.id));
     } else {
-      // INSERT WITH REQUIRED PRICE FIELD
       await db.insert(cartItems).values({
         cartId: userCart.id,
         productId,
@@ -307,9 +328,8 @@ export const addToCartServer = async (
     }
 
     return { success: true };
-  } catch (error) {
-    console.error("Failed to sync cart:", error);
-    return { success: false, error };
+  } catch (error: any) {
+    return { success: false, message: error.message || "Database error" };
   }
 };
 
@@ -318,64 +338,133 @@ export const validateCart = async (
 ): Promise<CartItem[]> => {
   if (localItems.length === 0) return [];
 
+  // Get all unique IDs
+  const allProductIds = Array.from(
+    new Set(localItems.map((i) => Number(i.productId)))
+  );
+
   const variantIds = localItems
-    .map((i) => i.variantId)
-    .filter((id): id is number => id !== undefined);
+    .filter((i) => i.variantId !== undefined && i.variantId !== null)
+    .map((i) => Number(i.variantId));
 
-  if (variantIds.length === 0) return localItems;
+  // Fetch Products
+  const dbProducts = await db.query.products.findMany({
+    where: inArray(products.id, allProductIds),
+    columns: {
+      id: true,
+      name: true,
+      basePrice: true,
+      salePrice: true,
+      stock: true,
+      mainImagePath: true,
+      isActive: true,
+    },
+  });
 
-  const dbVariants = await db
-    .select({
-      id: productVariants.id,
-      price: productVariants.salePrice,
-      basePrice: productVariants.price,
-      stock: productVariants.stockQuantity,
-      lowStockThreshold: productVariants.lowStockThreshold,
-      productName: products.name,
-      variantName: productVariants.variantName,
-      productImage: products.mainImagePath,
-      variantImage: productVariants.imagePath,
-      isActive: productVariants.isActive,
-      productActive: products.isActive,
-    })
-    .from(productVariants)
-    .innerJoin(products, eq(productVariants.productId, products.id))
-    .where(inArray(productVariants.id, variantIds));
+  // Fetch Variants (if any)
+  let dbVariants: any[] = [];
+  if (variantIds.length > 0) {
+    dbVariants = await db.query.productVariants.findMany({
+      where: inArray(productVariants.id, variantIds),
+      with: {
+        product: {
+          columns: {
+            id: true,
+            name: true,
+            mainImagePath: true,
+            isActive: true,
+          },
+        },
+      },
+    });
+  }
 
-  const validatedItems: CartItem[] = localItems.map((item) => {
-    const truth = dbVariants.find((v) => v.id === item.variantId);
+  // Validate Items
+  return localItems.map((item) => {
+    const isVariant = item.variantId !== undefined && item.variantId !== null;
 
-    if (!truth || !truth.isActive || !truth.productActive) {
+    let isValid = false;
+    let finalData = {
+      price: 0,
+      stock: 0,
+      threshold: 5,
+      name: `${item.name} (Unavailable)`,
+      image: item.image,
+    };
+
+    if (isVariant) {
+      // --- LOGIC FOR VARIANTS ---
+      const truth = dbVariants.find((v) => v.id === Number(item.variantId));
+
+      if (truth && truth.isActive && truth.product?.isActive) {
+        isValid = true;
+        const realPrice = truth.salePrice || truth.price;
+        const rawImage = truth.imagePath || truth.product.mainImagePath || "";
+
+        finalData = {
+          price: parseFloat(realPrice),
+          stock: truth.stockQuantity,
+          threshold: truth.lowStockThreshold || 5,
+          name: `${truth.product.name} - ${truth.variantName}`,
+          image: rawImage
+            ? (transformedProductImage(rawImage) as string)
+            : item.image,
+        };
+      }
+    } else {
+      // --- LOGIC FOR SIMPLE PRODUCTS (Laptops) ---
+      const truth = dbProducts.find((p) => p.id === Number(item.productId));
+
+      if (truth && truth.isActive) {
+        isValid = true;
+        const realPrice = truth.salePrice || truth.basePrice;
+
+        finalData = {
+          price: parseFloat(realPrice),
+          stock: truth.stock, // If this is 0 in DB, item is Out of Stock
+          threshold: 5, // Hardcoded because schema lacks column
+          name: truth.name,
+          image: truth.mainImagePath
+            ? (transformedProductImage(truth.mainImagePath) as string)
+            : item.image,
+        };
+      }
+    }
+
+    if (!isValid) {
       return {
         ...item,
         maxStock: 0,
         quantity: 0,
-        price: 0,
-        name: `${item.name} (Unavailable)`,
+        name: finalData.name,
       };
     }
 
-    const realPrice = truth.price
-      ? parseFloat(truth.price)
-      : parseFloat(truth.basePrice);
-
-    const rawImagePath = truth.variantImage || truth.productImage || "";
-    const validImageUrl = rawImagePath
-      ? transformedProductImage(rawImagePath)
-      : transformedProductImage(item.image);
-
     return {
       ...item,
-      price: realPrice,
-      maxStock: truth.stock,
-      lowStockThreshold: truth.lowStockThreshold || 5,
-      quantity: Math.min(item.quantity, truth.stock),
-      name: truth.productName,
-      image: validImageUrl as string,
+      price: finalData.price,
+      maxStock: finalData.stock,
+      lowStockThreshold: finalData.threshold,
+      quantity: Math.min(item.quantity, finalData.stock),
+      name: finalData.name,
+      image: finalData.image,
     };
   });
+};
 
-  return validatedItems;
+export const clearCartServer = async () => {
+  const session = await auth.api.getSession({ headers: await headers() });
+  if (!session?.user) return;
+
+  const userCart = await db.query.cart.findFirst({
+    where: eq(cart.userId, session.user.id),
+  });
+
+  if (userCart) {
+    await db.delete(cartItems).where(eq(cartItems.cartId, userCart.id));
+  }
+
+  return { success: true };
 };
 
 type CheckoutPayload = {
@@ -591,3 +680,161 @@ export async function getOrderWithRetry(paymentIntentId: string) {
     with: { items: { with: { product: true } } },
   });
 }
+
+export const getEligibleOrder = async (userId: string, productId: number) => {
+  const result = await db
+    .select({
+      orderId: orders.id,
+      orderDate: orders.createdAt,
+    })
+    .from(orders)
+    .innerJoin(orderItems, eq(orders.id, orderItems.orderId))
+    .where(
+      and(
+        eq(orders.userId, userId),
+        eq(orderItems.productId, productId)
+        // eq(orders.status, "delivered") // Uncomment if want to track delivery status
+      )
+    )
+    .limit(1);
+
+  return result[0] || null;
+};
+
+export const updateProductStats = async (productId: number) => {
+  const result = await db
+    .select({
+      count: sql<number>`count(*)`,
+      avg: sql<string>`avg(${reviews.rating})`,
+    })
+    .from(reviews)
+    .where(and(eq(reviews.productId, productId), eq(reviews.isApproved, true)));
+
+  // Fallback to default object if result[0] is somehow undefined
+  const stats = result[0] ?? { count: 0, avg: null };
+
+  const count = Number(stats.count);
+  const average = Number(stats.avg) || 0;
+
+  // Update the Products table cache
+  await db
+    .update(products)
+    .set({
+      averageRating: average,
+      totalReviews: count,
+      updatedAt: new Date(),
+    })
+    .where(eq(products.id, productId));
+};
+
+export const addReview = async (
+  productId: number,
+  rating: number,
+  title: string,
+  comment: string
+) => {
+  const session = await auth.api.getSession({ headers: await headers() });
+  if (!session?.user) {
+    throw new Error("You must be logged in to give review");
+  }
+
+  const userId = session.user.id;
+
+  const eligibleOrder = await getEligibleOrder(userId, productId);
+
+  if (!eligibleOrder) {
+    throw new Error(
+      "Verified Purchase Required: You must purchase this product to leave a review."
+    );
+  }
+  // check for existing review
+  const existing = await db.query.reviews.findFirst({
+    where: and(eq(reviews.productId, productId), eq(reviews.userId, userId)),
+  });
+
+  if (existing) {
+    throw new Error("You have already reviewed this product.");
+  }
+
+  // insert review
+  await db.insert(reviews).values({
+    userId: userId,
+    userName: session.user.name,
+    userEmail: session.user.email,
+    productId,
+    orderId: eligibleOrder.orderId,
+    rating,
+    title,
+    comment,
+    isApproved: true, // Auto-approve for now (set to false if you want admin moderation)
+    isVerifiedPurchase: false, // You can link this to orders table later
+  });
+
+  await updateProductStats(productId);
+  revalidatePath(`/products/${productId}`);
+};
+
+export const updateReview = async (
+  reviewId: number,
+  rating: number,
+  title: string,
+  comment: string,
+  productId: number
+) => {
+  const session = await auth.api.getSession({ headers: await headers() });
+  if (!session?.user) {
+    throw new Error("Unauthorized");
+  }
+
+  // verify ownership
+  const review = await db.query.reviews.findFirst({
+    where: eq(reviews.id, reviewId),
+  });
+
+  if (!review || review.userId !== session.user.id) {
+    throw new Error("You can only edit your own reviews.");
+  }
+
+  await db.update(reviews).set({
+    rating,
+    title,
+    comment,
+    updatedAt: new Date(),
+  });
+
+  await updateProductStats(productId);
+  revalidatePath(`/products/${productId}`);
+};
+
+export const deleteReview = async (reviewId: number, productId: number) => {
+  const session = await auth.api.getSession({ headers: await headers() });
+  if (!session?.user) {
+    throw new Error("Unauthorized");
+  }
+
+  await db
+    .delete(reviews)
+    .where(and(eq(reviews.id, reviewId), eq(reviews.userId, session.user.id)));
+
+  await updateProductStats(productId);
+  revalidatePath(`/products/${productId}`);
+};
+
+export const getProductReview = async (productId: number) => {
+  const data = await db.query.reviews.findMany({
+    where: and(eq(reviews.productId, productId), eq(reviews.isApproved, true)),
+    with: {
+      user: {
+        columns: {
+          image: true,
+        },
+      },
+    },
+    orderBy: [desc(reviews.createdAt)],
+  });
+
+  return data.map((r) => ({
+    ...r,
+    userImage: r.user?.image || null,
+  }));
+};

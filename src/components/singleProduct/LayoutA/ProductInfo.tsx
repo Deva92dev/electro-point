@@ -15,7 +15,11 @@ interface InfoProps {
 }
 
 // some functionality requires conditional rendering either laptop or tv
-const ProductInfo = ({ product, isFavorite = false }: InfoProps) => {
+const ProductInfo = ({
+  product,
+  isFavorite = false,
+  isAuthenticated,
+}: InfoProps) => {
   const specs = product.specs as any;
 
   const [selectedVariant, setSelectedVariant] = useState(
@@ -152,6 +156,7 @@ const ProductInfo = ({ product, isFavorite = false }: InfoProps) => {
               : undefined
           }
           currentImage={selectedVariant?.url || product.mainImagePath}
+          isAuthenticated={isAuthenticated}
           className="w-full h-14 text-lg font-bold rounded-full shadow-xl shadow-primary/20"
         />
         <div className="flex items-center justify-center text-sm text-muted-foreground">

@@ -1,5 +1,3 @@
-import { Suspense } from "react";
-import { ProductDetailSkeleton } from "@/components/singleProduct/Skeletons";
 import { ProductContent } from "@/components/singleProduct/ProductContent";
 import { getProductIds } from "@/utils/actions/filter-actions";
 
@@ -18,9 +16,7 @@ type PageProps = {
 const DetailsPage = async (props: PageProps) => {
   return (
     <main className="bg-background">
-      <Suspense fallback={<ProductDetailSkeleton />}>
-        <ProductContent paramsPromise={props.params} />
-      </Suspense>
+      <ProductContent paramsPromise={props.params} />
     </main>
   );
 };

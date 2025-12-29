@@ -15,6 +15,7 @@ import {
 } from "drizzle-orm";
 import { ProductSearchParams } from "../types";
 
+// add more filters like rating, quick-specs,
 export const getAllProducts = async (params: ProductSearchParams) => {
   const ITEMS_PER_PAGE = 12;
   const page = Number(params.page) || 1;

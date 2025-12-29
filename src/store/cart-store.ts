@@ -1,9 +1,9 @@
 import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
 
-export type CartItem = {
+export interface CartItem {
   productId: number;
-  variantId?: number; // optional if no variant is selected
+  variantId?: number;
   name: string;
   price: number;
   image: string;
@@ -11,11 +11,20 @@ export type CartItem = {
   quantity: number;
   maxStock: number;
   lowStockThreshold?: number;
+}
+
+// Helper to generate consistent IDs
+const getCartItemId = (productId: number, variantId?: number | null) => {
+  const pid = productId;
+  const vid = variantId ? variantId : "base";
+  return `p${pid}-v${vid}`;
 };
 
 interface CartState {
   items: CartItem[];
-  isOpen: boolean; // controls the UI sheet
+  isOpen: boolean;
+  isSynced: boolean;
+
   addItem: (item: CartItem) => void;
   removeItem: (productId: number, variantId?: number) => void;
   updateQuantity: (
@@ -26,11 +35,9 @@ interface CartState {
   clearCart: () => void;
   toggleCart: () => void;
   getCartTotal: () => number;
-  getItemCount: () => number;
 
-  isSynced: boolean; // Tracks if prices are real
   setSynced: (synced: boolean) => void;
-  syncWithServer: (validItems: CartItem[]) => void; //  Replaces local items with server truth
+  syncWithServer: (validItems: CartItem[]) => void;
 }
 
 export const useCartStore = create<CartState>()(
@@ -42,57 +49,64 @@ export const useCartStore = create<CartState>()(
 
       addItem: (newItem) => {
         const { items } = get();
-        // check if the item exists
-        const existingItem = items.find(
-          (i) =>
-            i.productId === newItem.productId &&
-            i.variantId === newItem.variantId
+        // Force valid ID generation
+        const newItemId = getCartItemId(
+          newItem.productId,
+          newItem.variantId || null
         );
 
-        if (existingItem) {
+        const existingItemIndex = items.findIndex(
+          (i) => getCartItemId(i.productId, i.variantId || null) === newItemId
+        );
+
+        if (existingItemIndex > -1) {
+          const existingItem = items[existingItemIndex];
+
+          if (!existingItem) return;
+
           const newQty = Math.min(
             existingItem.quantity + newItem.quantity,
-            newItem.maxStock
+            existingItem.maxStock
           );
-          set({
-            items: items.map((i) =>
-              i.productId === newItem.productId &&
-              i.variantId === newItem.variantId
-                ? { ...i, quantity: newQty }
-                : i
-            ),
-            isOpen: true,
-            isSynced: false,
-          });
+
+          const updatedItems = [...items];
+          updatedItems[existingItemIndex] = {
+            ...existingItem,
+            quantity: newQty,
+          };
+
+          set({ items: updatedItems, isOpen: true, isSynced: false });
         } else {
-          // add new item
-          set({ items: [...items, newItem], isOpen: true });
+          set({ items: [...items, newItem], isOpen: true, isSynced: false });
         }
       },
 
       removeItem: (pid, vid) => {
+        const targetId = getCartItemId(pid, vid || null);
         set({
           items: get().items.filter(
-            (i) => !(i.productId === pid && i.variantId === vid)
+            (i) => getCartItemId(i.productId, i.variantId || null) !== targetId
           ),
-          isSynced: false, // Mark as unsynced
+          isSynced: false,
         });
       },
 
       updateQuantity: (pid, vid, qty) => {
+        const targetId = getCartItemId(pid, vid || null);
         set({
           items: get().items.map((i) => {
-            if (i.productId === pid && i.variantId === vid) {
+            if (getCartItemId(i.productId, i.variantId || null) === targetId) {
+              // Ensure we don't exceed stock or go below 1
               const validQty = Math.max(1, Math.min(qty, i.maxStock));
               return { ...i, quantity: validQty };
             }
             return i;
           }),
-          isSynced: false, // Mark as unsynced
+          isSynced: false,
         });
       },
 
-      clearCart: () => set({ items: [], isSynced: true }), // Empty is always synced
+      clearCart: () => set({ items: [], isSynced: false }),
       toggleCart: () => set({ isOpen: !get().isOpen }),
 
       getCartTotal: () => {
@@ -102,24 +116,24 @@ export const useCartStore = create<CartState>()(
         );
       },
 
-      getItemCount: () => {
-        return get().items.reduce((count, item) => count + item.quantity, 0);
-      },
-
-      // Sync Actions
       setSynced: (val) => set({ isSynced: val }),
 
-      syncWithServer: (validItems) =>
-        set({ items: validItems, isSynced: true }),
+      syncWithServer: (serverItems) => {
+        // Force overwrite from server
+        set({
+          items: serverItems,
+          isSynced: true,
+        });
+      },
     }),
     {
       name: "electropoint-cart",
       storage: createJSONStorage(() => localStorage),
-      // don't want to persist 'isOpen'
       partialize: (state) => ({
         items: state.items,
         isSynced: state.isSynced,
       }),
+      skipHydration: false,
     }
   )
 );

@@ -519,6 +519,9 @@ export const reviews = pgTable(
     productId: integer("product_id")
       .references(() => products.id, { onDelete: "cascade" })
       .notNull(),
+    orderId: integer("order_id")
+      .references(() => orders.id)
+      .notNull(),
     userId: text("user_id").references(() => user.id),
     userName: text("user_name").notNull(),
     userEmail: text("user_email"),
@@ -685,8 +688,14 @@ export const cartItems = pgTable(
   (table) => [
     index("cart_item_cart_idx").on(table.cartId),
     index("cart_item_product_idx").on(table.productId),
-    // Prevents duplicate rows for the same variant in one cart
-    uniqueIndex("cart_item_unique_variant").on(table.cartId, table.variantId),
+
+    // Include productId in the unique constraint
+    // This allows multiple Simple Products (variantId=null) in the same cart
+    uniqueIndex("cart_item_unique_idx").on(
+      table.cartId,
+      table.productId,
+      table.variantId
+    ),
   ]
 );
 
@@ -877,6 +886,11 @@ export const reviewsRelations = relations(reviews, ({ one }) => ({
     fields: [reviews.productId],
     references: [products.id],
   }),
+  user: one(user, {
+    fields: [reviews.userId],
+    references: [user.id],
+  }),
+  order: one(orders, { fields: [reviews.orderId], references: [orders.id] }),
 }));
 
 export const tagsRelations = relations(tags, ({ many }) => ({

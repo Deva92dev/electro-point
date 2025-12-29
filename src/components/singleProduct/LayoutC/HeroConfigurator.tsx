@@ -15,7 +15,11 @@ interface Props {
   isFavorite?: boolean;
 }
 
-const HeroConfigurator = ({ product, isFavorite = false }: Props) => {
+const HeroConfigurator = ({
+  product,
+  isFavorite = false,
+  isAuthenticated,
+}: Props) => {
   const initialColor = product.availableColors?.[0] || {
     name: "Default",
     hex: "#333",
@@ -215,6 +219,7 @@ const HeroConfigurator = ({ product, isFavorite = false }: Props) => {
               }}
               currentImage={activeImage}
               selectedVariant={variantForCart}
+              isAuthenticated={isAuthenticated}
               className="w-full h-14 text-lg font-bold bg-white text-black hover:bg-zinc-200 rounded-full transition-transform hover:scale-105"
             />
             <p className="text-center text-xs text-muted-foreground">

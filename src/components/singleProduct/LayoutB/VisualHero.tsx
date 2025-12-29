@@ -18,7 +18,11 @@ type Props = {
 
 // will inject dynamic colored gradients based on the selected variant.
 
-const VisualHero = ({ product, isFavorite = false }: Props) => {
+const VisualHero = ({
+  product,
+  isFavorite = false,
+  isAuthenticated,
+}: Props) => {
   // Initial State
   const [activeImage, setActiveImage] = useState(
     product.images[0]?.url || product.mainImagePath
@@ -192,6 +196,7 @@ const VisualHero = ({ product, isFavorite = false }: Props) => {
             }}
             currentImage={activeImage}
             selectedVariant={variantForCart}
+            isAuthenticated={isAuthenticated}
             className="w-full h-14 text-lg font-bold bg-white text-black hover:bg-zinc-200 rounded-full transition-transform hover:scale-105"
           />
           <p className="text-center text-xs text-white/40">

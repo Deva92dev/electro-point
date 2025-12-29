@@ -27,7 +27,7 @@ import {
 import { useTheme } from "next-themes";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 
 const ActionButtons = () => {
   const count = useCartStore((state) =>
@@ -35,38 +35,52 @@ const ActionButtons = () => {
   );
   const toggleCart = useCartStore((state) => state.toggleCart);
   const syncWithServer = useCartStore((state) => state.syncWithServer);
-  const isSynced = useCartStore((state) => state.isSynced);
+
+  const clearCart = useCartStore((state) => state.clearCart);
 
   const { theme, setTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
   const router = useRouter();
 
-  const { data: session, isPending } = useSession();
+  const { data: session } = useSession();
+
+  // Ref to track retries (Fixes Race Condition)
+  const retryCount = useRef(0);
 
   useEffect(() => {
     setMounted(true);
   }, []);
 
   useEffect(() => {
-    const syncCart = async () => {
-      if (session?.user && !isSynced) {
-        try {
-          const serverItems = await getCart();
-          if (serverItems) {
-            syncWithServer(serverItems);
+    if (!session?.user) {
+      return;
+    }
+
+    const fetchServerCart = async () => {
+      try {
+        const serverItems = await getCart();
+        if (serverItems) {
+          syncWithServer(serverItems);
+          retryCount.current = 0; // Success, reset retry
+        } else {
+          if (retryCount.current < 3) {
+            retryCount.current += 1;
+            setTimeout(fetchServerCart, 500);
           }
-        } catch (error) {
-          console.error("Failed to sync cart:", error);
         }
+      } catch (err) {
+        // Silent failure
       }
     };
-    syncCart();
-  }, [session, syncWithServer, isSynced]);
+
+    fetchServerCart();
+  }, [session?.user?.id, syncWithServer]);
 
   const handleLogout = async () => {
     await signOut({
       fetchOptions: {
         onSuccess: () => {
+          clearCart();
           router.push("/");
         },
       },
@@ -122,7 +136,6 @@ const ActionButtons = () => {
                 </AvatarFallback>
               </Avatar>
             ) : (
-              // Generic Icon for Guests / Loading
               <User
                 className="w-5 h-5 text-muted-foreground"
                 aria-hidden="true"
